@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GobyOS Boot - Gal Ben</title>
+
+    <style>
+      /* REQUESTED FONT */
+      @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+      :root {
+        /* Cyberpunk Neon Palette */
+        --bg-color: #050510;
+        --c-pink: #ff2a6d;
+        --c-cyan: #05d9e8;
+        --c-green: #00ff9f;
+        --c-yellow: #f7f700;
+        --c-orange: #ff9100;
+        --c-purple: #bd00ff;
+        --c-red: #ff0055;
+        --c-white: #e0faff;
+        
+        --ui-font: "Press Start 2P", cursive;
+      }
+
+      html, body {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background-color: var(--bg-color);
+        color: var(--c-white);
+        font-family: var(--ui-font);
+        
+        /* "Press Start 2P" is wide, so we use responsive sizing */
+        font-size: clamp(9px, 1.5vw, 14px); 
+        line-height: 1.6; /* Needs breathing room */
+        
+        /* DISABLE COPY / SELECT */
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+      }
+
+      /* CRT Scanline & Vignette Effects */
+      body::before {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                    linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+        background-size: 100% 4px, 6px 100%;
+        z-index: 99;
+        pointer-events: none;
+      }
+      
+      body::after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 0; left: 0; bottom: 0; right: 0;
+        background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%);
+        z-index: 99;
+        pointer-events: none;
+      }
+
+      #terminal {
+        position: relative;
+        z-index: 1;
+        padding: 30px; /* Reduced padding for mobile */
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        overflow-y: auto;
+        padding-bottom: 100px;
+      }
+
+      /* Custom Scrollbar */
+      #terminal::-webkit-scrollbar { width: 8px; }
+      #terminal::-webkit-scrollbar-thumb { background: var(--c-purple); }
+      #terminal::-webkit-scrollbar-track { background: #000; }
+
+      /* Utility Classes for Colors */
+      .c-pink   { color: var(--c-pink); text-shadow: 2px 2px 0px rgba(255, 42, 109, 0.3); }
+      .c-cyan   { color: var(--c-cyan); text-shadow: 2px 2px 0px rgba(5, 217, 232, 0.3); }
+      .c-green  { color: var(--c-green); text-shadow: 2px 2px 0px rgba(0, 255, 159, 0.3); }
+      .c-purple { color: var(--c-purple); text-shadow: 2px 2px 0px rgba(189, 0, 255, 0.3); }
+      .c-red    { color: var(--c-red); text-shadow: 2px 2px 0px rgba(255, 0, 85, 0.3); }
+      .c-yellow { color: var(--c-yellow); text-shadow: 2px 2px 0px rgba(247, 247, 0, 0.3); }
+      .c-orange { color: var(--c-orange); text-shadow: 2px 2px 0px rgba(255, 145, 0, 0.3); }
+      .c-white  { color: var(--c-white); text-shadow: 2px 2px 0px rgba(224, 250, 255, 0.3); }
+      
+      .dim { opacity: 0.7; }
+
+      /* Rainbow Bar Logic */
+      .rainbow-block {
+        display: inline-block;
+        letter-spacing: -4px; /* Tighten blocks for pixel font */
+      }
+
+      /* The Blinking Cursor */
+      .cursor {
+        display: inline-block;
+        width: 12px;
+        height: 1em;
+        background-color: var(--c-pink);
+        vertical-align: text-bottom;
+        animation: blink 1s step-end infinite;
+      }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      /* Skip Button */
+      #skip-hint {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-family: var(--ui-font);
+        font-size: 10px; /* Small pixel font */
+        color: var(--c-cyan);
+        z-index: 100;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        border: 2px solid var(--c-cyan);
+        padding: 10px;
+        background: #000;
+        box-shadow: 4px 4px 0px var(--c-purple);
+        cursor: pointer;
+        pointer-events: auto;
+      }
+      #skip-hint:hover {
+        background: var(--c-cyan);
+        color: #000;
+        box-shadow: 4px 4px 0px var(--c-white);
+      }
+
+      @media (max-width: 600px) {
+        #terminal { padding: 15px; }
+      }
+      
+      .line { margin-bottom: 5px; min-height: 1.2em; word-break: break-all; }
+    </style>
+  </head>
+  
+  <body>
+    
+    <div id="terminal"></div>
+    <div id="skip-hint">PRESS START</div>
+
+    <script>
+      /* CONFIGURATION */
+      const TYPE_SPEED = 15; 
+      const LINE_PAUSE = 40; 
+      const TARGET_URL = "site/index.html";
+      const BUILD_DATE = "1998-09-30"; // User Birth Date
+
+      // Helper to generate rainbow blocks
+      const RB = "█";
+      const RAINBOW_LINE = `
+        <span class="rainbow-block">
+          <span class="c-red">${RB}${RB}${RB}</span><span class="c-orange">${RB}${RB}${RB}</span><span class="c-yellow">${RB}${RB}${RB}</span><span class="c-green">${RB}${RB}${RB}</span><span class="c-cyan">${RB}${RB}${RB}</span><span class="c-purple">${RB}${RB}${RB}</span><span class="c-pink">${RB}${RB}${RB}</span>
+        </span>
+      `;
+
+      /* * BOOT SEQUENCE */
+      const bootSequence = [
+        `<span class="c-purple">GobyOS</span> <span class="c-cyan">BOOTLOADER v1.0</span>`,
+        `<span class="c-pink">Build Date:</span> ${BUILD_DATE}`,
+        `-----------------------------`,
+        "",
+        `<span class="c-white">Probing Hardware...</span>`,
+        `<span class="c-green">[OK]</span> CPU: GobyCore X-98`,
+        "MEMTEST", // Dynamic memory line
+        `<span class="c-green">[OK]</span> GPU: <span class="c-cyan">NeonFX 3000</span>`,
+        "",
+        `<span class="c-white">GPU Color Test:</span>`,
+        RAINBOW_LINE, 
+        `<span class="c-green">[PASS]</span> Calibration OK`,
+        "",
+        `<span class="c-green">[OK]</span> Snd: <span class="c-orange">Sound Blaster 16</span>`,
+        `<span class="c-green">[OK]</span> Net: <span class="c-purple">Eth0</span> (Active)`,
+        `<span class="c-green">[OK]</span> Inp: Keyboard Found`,
+        "",
+        "> mounting /dev/sda1...",
+        "> checking hash...",
+        `<span class="c-green">[OK]</span> Hash: 9f86d081`,
+        "",
+        "> login: root",
+        "> password: ********",
+        "",
+        `<span class="c-cyan">ACCESS GRANTED</span>`,
+        `<span class="c-pink dim">User: Gal Ben</span>`,
+        "",
+        "> load control_sys.sys",
+        "> load mech_mod.lib",
+        "",
+        `<span class="c-yellow">[INFO]</span> Starting UI...`,
+        `<span class="c-purple">Loading Session >>></span>`,
+      ];
+
+      const terminal = document.getElementById("terminal");
+      const skipHint = document.getElementById("skip-hint");
+      let skipped = false;
+
+      // Memory Test Logic
+      async function runMemoryTest(div) {
+        div.innerHTML = `<span class="c-cyan">RAM:</span> <span class="c-yellow">0KB</span>`;
+        const total = 65536; 
+        let current = 0;
+        const step = 4096; // Faster steps
+        
+        while (current <= total) {
+            if (skipped) {
+                div.innerHTML = `<span class="c-cyan">RAM:</span> <span class="c-green">${total}KB OK</span>`;
+                return;
+            }
+            div.innerHTML = `<span class="c-cyan">RAM:</span> <span class="c-yellow">${current}KB</span>`;
+            current += step;
+            window.scrollTo(0, document.body.scrollHeight);
+            await new Promise(r => setTimeout(r, 10)); 
+        }
+        div.innerHTML = `<span class="c-cyan">RAM:</span> <span class="c-green">${total}KB OK</span>`;
+      }
+
+      async function typeText() {
+        const cursor = document.createElement("span");
+        cursor.className = "cursor";
+        terminal.appendChild(cursor);
+
+        for (let line of bootSequence) {
+          if (skipped) return;
+
+          const div = document.createElement("div");
+          div.className = "line";
+          terminal.insertBefore(div, cursor);
+
+          if (line === "MEMTEST") {
+             await runMemoryTest(div);
+             await new Promise(r => setTimeout(r, LINE_PAUSE));
+             continue;
+          }
+
+          // User Input Logic
+          if (line.trim().startsWith(">")) {
+            div.className = "line c-white"; 
+            for (let char of line) {
+              if (skipped) return;
+              div.textContent += char;
+              window.scrollTo(0, document.body.scrollHeight);
+              await new Promise(r => setTimeout(r, TYPE_SPEED + Math.random() * 20));
+            }
+          } 
+          // System Output Logic
+          else {
+            div.innerHTML = line;
+            window.scrollTo(0, document.body.scrollHeight);
+          }
+
+          await new Promise(r => setTimeout(r, LINE_PAUSE));
+        }
+
+        if (!skipped) {
+          setTimeout(finishBoot, 800);
+        }
+      }
+
+      function finishBoot() {
+        window.location.href = TARGET_URL;
+      }
+
+      function skip() {
+        if (skipped) return;
+        skipped = true;
+        
+        const cursor = document.querySelector(".cursor");
+        if(cursor) cursor.remove();
+        
+        const lastLine = document.createElement("div");
+        lastLine.className = "c-pink line";
+        lastLine.textContent = ">>> WARP DRIVE ACTIVE";
+        terminal.appendChild(lastLine);
+        window.scrollTo(0, document.body.scrollHeight);
+
+        setTimeout(finishBoot, 200);
+      }
+
+      document.addEventListener("keydown", skip);
+      document.addEventListener("click", skip);
+      document.addEventListener("touchstart", skip);
+      skipHint.addEventListener("click", (e) => {
+          e.stopPropagation(); 
+          skip();
+      });
+
+      setTimeout(() => {
+        if(!skipped) skipHint.style.opacity = 1;
+      }, 1000);
+
+      window.onload = typeText;
+    </script>
+  </body>
+</html>

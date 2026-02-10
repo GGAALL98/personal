@@ -1,0 +1,345 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap");
+
+:root {
+  /* Cyberpunk Palette */
+  --bg-color: #050510;
+  --c-pink: #ff2a6d;
+  --c-cyan: #05d9e8;
+  --c-green: #00ff9f;
+  --c-purple: #bd00ff;
+  --c-yellow: #f7f700;
+  --c-white: #e0faff;
+  
+  --terminal-space: 9.5rem;
+  
+  /* Standard Spacing for Pixel Font */
+  --line-height: 1.6;
+}
+
+/* Base layout with CRT scanline effect */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  /* Use the requested arcade font */
+  font-family: "Press Start 2P", cursive; 
+  /* Responsive font sizing for the wide pixel font */
+  font-size: clamp(10px, 1.5vw, 12px);
+  line-height: var(--line-height);
+  
+  padding: 2rem;
+  padding-bottom: calc(var(--terminal-space) + 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  color: var(--c-white);
+  background-color: var(--bg-color);
+  
+  /* Disable selection for immersion */
+  -webkit-user-select: none;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+/* CRT Scanline Overlay */
+body::before {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+  background-size: 100% 4px, 6px 100%;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Vignette (Dark Corners) */
+body::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.7) 100%);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* Links */
+a {
+  color: var(--c-cyan);
+  text-decoration: none;
+  border-bottom: 2px solid var(--c-cyan);
+  transition: all 0.2s ease;
+  text-shadow: 0 0 5px var(--c-cyan);
+}
+a:hover {
+  color: var(--bg-color);
+  background-color: var(--c-cyan);
+  box-shadow: 0 0 15px var(--c-cyan);
+}
+
+/* Hero Section */
+.hero {
+  border: 2px solid var(--c-pink);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  
+  /* Neon Glow */
+  box-shadow: 0 0 10px var(--c-pink), inset 0 0 10px rgba(255, 42, 109, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 150px 1fr;
+    gap: 2rem;
+  }
+  .hero .text {
+    text-align: left;
+  }
+}
+
+.hero img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border: 2px solid var(--c-cyan);
+  border-radius: 4px;
+  padding: 4px;
+  image-rendering: pixelated;
+  display: block;
+  box-shadow: 0 0 10px var(--c-cyan);
+}
+
+.hero h1 {
+  margin: 0 0 10px 0;
+  font-size: 1.6rem;
+  color: var(--c-yellow);
+  text-shadow: 4px 4px 0px var(--c-purple);
+  line-height: 1.4;
+}
+
+.hero p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--c-white);
+  line-height: 1.8;
+}
+
+.nav-links {
+  margin-top: 1rem;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Panels Grid */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1000px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Panel Visual */
+.panel {
+  border: 2px solid var(--c-purple);
+  border-radius: 4px;
+  padding: 1.25rem;
+  min-height: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  
+  /* Neon Glow */
+  box-shadow: 0 0 8px var(--c-purple);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Panel Title */
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  border-bottom: 2px dashed var(--c-purple);
+  padding-bottom: 10px;
+}
+
+.panel-title .dollar {
+  color: var(--c-pink);
+  text-shadow: 0 0 5px var(--c-pink);
+}
+
+.panel-title .name {
+  color: var(--c-cyan);
+  text-shadow: 0 0 5px var(--c-cyan);
+  letter-spacing: 1px;
+}
+
+/* Console Text */
+.console-line {
+  margin: 0.4rem 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 0.85rem;
+  color: var(--c-white);
+}
+
+/* Progress Bars */
+.progress-bar-container {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  background: #111;
+  margin-top: 8px;
+  border: 1px solid #333;
+}
+
+.progress-bar {
+  height: 100%;
+  /* Default to neon green, JS will override for gradient effect */
+  background: var(--c-green);
+  width: 0%;
+  box-shadow: 0 0 10px var(--c-green);
+  transition: width 0.5s ease;
+}
+
+.progress-percent {
+  position: absolute;
+  right: 6px;
+  top: 2px;
+  font-size: 10px;
+  color: #fff;
+  z-index: 2;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Graduation Countdown */
+.countdown {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--c-yellow);
+  text-shadow: 0 0 5px var(--c-yellow);
+  text-align: center;
+}
+
+/* Fixed Bottom Terminal - UPDATED */
+.bottom-terminal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(5, 5, 16, 0.95);
+  
+  /* Removed simple border, replaced with pseudo-element below */
+  border-top: none; 
+  
+  color: var(--c-cyan);
+  font-family: "Press Start 2P", cursive;
+  font-size: 0.7rem;
+  padding: 0.8rem 1rem;
+  
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  box-sizing: border-box;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.8);
+}
+
+/* The Animated Glowing Bar */
+.bottom-terminal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px; /* Thickness of the bar */
+  
+  /* Rainbow Cyberpunk Gradient */
+  background: linear-gradient(90deg, 
+    var(--c-pink), 
+    var(--c-purple), 
+    var(--c-cyan), 
+    var(--c-green), 
+    var(--c-pink)
+  );
+  background-size: 200% 100%;
+  
+  /* Animation and Glow */
+  animation: barMove 3s linear infinite;
+  box-shadow: 0 0 15px var(--c-pink);
+  z-index: 101;
+}
+
+@keyframes barMove {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.bottom-terminal .prompt {
+  margin-right: 0.5rem;
+  color: var(--c-pink);
+}
+
+.bottom-terminal .cursor {
+  display: inline-block;
+  width: 10px;
+  height: 1.2em;
+  background-color: var(--c-cyan);
+  margin-left: 5px;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.bottom-terminal .cmd-text {
+  white-space: pre-wrap;
+  color: var(--c-white);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 600px) {
+  body {
+    padding: 1rem;
+    padding-bottom: 8rem;
+  }
+  .hero {
+    padding: 1rem;
+  }
+  .panel {
+    padding: 1rem;
+  }
+  .hero h1 {
+    font-size: 1.2rem;
+  }
+}
