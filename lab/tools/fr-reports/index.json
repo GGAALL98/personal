@@ -1,0 +1,18 @@
+{
+  "reports": [
+    {
+      "brand": "KZ",
+      "model": "PR2",
+      "date": "2026-02-19",
+      "path": "reports/KZ/PR2/2026-02-19/",
+      "files": {
+        "pdf": "report.pdf",
+        "frL": "FR-L.csv",
+        "frR": null,
+        "irL": null,
+        "irR": null,
+        "photo": "photo.png"
+      }
+    }
+  ]
+}

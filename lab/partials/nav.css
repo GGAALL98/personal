@@ -1,0 +1,46 @@
+/* Dropdown scaffold (works with your existing Tailwind + colors) */
+.dd { position: relative; }
+
+.dd-panel{
+  position: absolute;
+  left: 0;
+  right: auto;
+  top: calc(100% + 12px);
+  width: 18rem;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 9999;
+}
+
+/* keep-open hover + keyboard */
+.dd:hover .dd-panel,
+.dd:focus-within .dd-panel{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0px);
+}
+
+/* keep-open on click (nav.js toggles dd-open) */
+.dd.dd-open .dd-panel{
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0px);
+}
+
+/* “hover gap” so it doesn’t disappear while moving mouse to panel */
+.dd-panel::before{
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: -14px;
+  height: 14px;
+}
+
+/* open to the other side when needed */
+.dd.right-open .dd-panel{
+  left: auto;
+  right: 0;
+}

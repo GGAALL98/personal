@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>G.A.L. — Roadmap</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" referrerpolicy="no-referrer" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["IBM Plex Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"],
+            display: ["Cinzel Decorative", "serif"],
+          },
+          colors: {
+            void: "#050505",
+            panel: "#0f0f10",
+            "accent-primary": "#ef4444",
+            "accent-secondary": "#eab308",
+            "accent-tertiary": "#a855f7",
+            "accent-cyan": "#06b6d4",
+          },
+          animation: {
+            "fade-in-up": "fadeInUp .9s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "hero-pop": "heroPop 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "arrow-bob": "arrowBob 1.4s ease-in-out infinite",
+            "sheen": "sheen 10s linear infinite",
+          },
+          keyframes: {
+            fadeInUp: { "0%": { opacity: "0", transform: "translateY(18px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+            heroPop: { "0%": { opacity: "0", transform: "translateY(14px) scale(0.995)", filter: "blur(4px)" }, "100%": { opacity: "1", transform: "translateY(0) scale(1)", filter: "blur(0px)" } },
+            arrowBob: { "0%,100%": { transform: "translateY(0px)" }, "50%": { transform: "translateY(5px)" } },
+            sheen: { "0%": { backgroundPosition: "0% 50%" }, "100%": { backgroundPosition: "220% 50%" } },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { --nav-h: 64px; }
+    body { background:#050505; color:#e0e0e0; font-family:"IBM Plex Sans",sans-serif; overflow-x:hidden; }
+    section[id] { scroll-margin-top: calc(var(--nav-h) + 18px); }
+
+    #intro-overlay{
+      position:fixed; inset:0; background:#050505; z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      transition:opacity .8s ease-out, visibility .8s ease-out;
+    }
+    .intro-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+    #hero-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:.78; }
+
+    .gal-accent-bar{
+      height:2px; border-radius:999px;
+      background-image: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.10),
+        rgba(239,68,68,0.85),
+        rgba(255,255,255,0.18),
+        rgba(168,85,247,0.75),
+        rgba(234,179,8,0.65),
+        rgba(239,68,68,0.85),
+        rgba(239,68,68,0.10)
+      );
+      background-size: 260% 100%;
+    }
+
+    .gal-hero-gradient{
+      background: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.18),
+        rgba(234,179,8,0.10),
+        rgba(168,85,247,0.16),
+        rgba(239,68,68,0.18)
+      );
+      background-size: 240% 100%;
+      animation: sheen 12s linear infinite;
+      opacity: .32;
+      mix-blend-mode: screen;
+    }
+
+    .panel { background:#0f0f10; border:1px solid rgba(255,255,255,.10); }
+    .input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); }
+    .input:focus { outline:none; border-color: rgba(239,68,68,.65); }
+    .btn { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); }
+    .btn:hover { border-color:rgba(239,68,68,.55); background:rgba(239,68,68,.10); }
+
+    .chip{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      padding:.35rem .6rem;
+      font-family:"IBM Plex Mono",monospace;
+      font-size:10px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:rgba(229,231,235,.90);
+      border-radius:2px;
+      user-select:none;
+      white-space:nowrap;
+    }
+
+    .phaseCard{
+      position:relative;
+      background:rgba(0,0,0,.22);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:2px;
+      overflow:hidden;
+      transition: transform .18s ease, border-color .18s ease, background-color .18s ease;
+    }
+    .phaseCard:hover{
+      transform: translateY(-3px);
+      background:rgba(255,255,255,.02);
+      border-color: rgba(239,68,68,.25);
+    }
+    .phaseCard::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background:
+        radial-gradient(60% 70% at 16% 10%, rgba(255,255,255,0.06), rgba(0,0,0,0) 55%),
+        radial-gradient(60% 70% at 92% 15%, rgba(239,68,68,0.06), rgba(0,0,0,0) 58%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0));
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .phaseInner{ position:relative; padding: 18px 18px; }
+    .kicker{
+      font-family:"IBM Plex Mono",monospace;
+      font-size:10px;
+      letter-spacing:.28em;
+      text-transform:uppercase;
+      color:rgba(156,163,175,.95);
+    }
+    .phaseTitle{
+      margin-top:10px;
+      color:white;
+      font-weight:900;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      font-size:15px;
+    }
+    .phaseSub{
+      margin-top:6px;
+      font-family:"IBM Plex Mono",monospace;
+      font-size:10px;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:rgba(156,163,175,.82);
+    }
+    .phaseDesc{
+      margin-top:12px;
+      color:rgba(156,163,175,.94);
+      font-size:13px;
+      line-height:1.6;
+      max-width: 72ch;
+    }
+
+    .badgeNum{
+      position:absolute;
+      right:14px;
+      top:10px;
+      font-family:"IBM Plex Mono",monospace;
+      font-weight:800;
+      font-size: 92px;
+      line-height:1;
+      color: rgba(255,255,255,0.06);
+      user-select:none;
+      pointer-events:none;
+    }
+
+    .iconBox{
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.22);
+      border-radius:2px;
+      flex:0 0 auto;
+    }
+
+    .spine{
+      width:2px;
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03), rgba(255,255,255,0));
+    }
+    .dot{
+      width:14px; height:14px; border-radius:999px;
+      box-shadow: 0 0 0 10px rgba(255,255,255,0.016);
+      border:1px solid rgba(255,255,255,0.14);
+    }
+    .dot.cyan{ background: rgba(6,182,212,0.92); border-color: rgba(6,182,212,0.65); }
+    .dot.red{ background: rgba(239,68,68,0.92); border-color: rgba(239,68,68,0.65); }
+    .dot.gold{ background: rgba(234,179,8,0.92); border-color: rgba(234,179,8,0.65); }
+    .dot.purple{ background: rgba(168,85,247,0.92); border-color: rgba(168,85,247,0.65); }
+
+    /* Reveal animation (uses same fade style, just on scroll) */
+    .reveal{ opacity:0; transform: translateY(16px); }
+    .reveal.in{ opacity:1; transform: translateY(0); transition: all .9s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.d1.in{ transition-delay: .10s; }
+    .reveal.d2.in{ transition-delay: .20s; }
+    .reveal.d3.in{ transition-delay: .30s; }
+    .reveal.d4.in{ transition-delay: .40s; }
+
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior:auto !important; }
+      .animate-fade-in-up,.animate-hero-pop,.animate-arrow-bob,.animate-sheen{ animation:none !important; opacity:1 !important; transform:none !important; filter:none !important; }
+      #hero-canvas{ display:none; }
+      .reveal{ opacity:1 !important; transform:none !important; }
+      .reveal.in{ transition:none !important; }
+    }
+  </style>
+
+  <!-- NAV partial slot -->
+  <div id="nav-slot"></div>
+
+  <!-- roadmap is at ./roadmap/ -->
+  <script>window.SITE_ROOT = "..";</script>
+  <link rel="stylesheet" href="../partials/nav.css">
+  <script src="../partials/nav.js" defer></script>
+</head>
+
+<body class="bg-void selection:bg-accent-primary selection:text-white min-h-screen flex flex-col">
+
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="text-center">
+      <div class="w-16 h-1 bg-accent-primary mx-auto mb-4 animate-pulse"></div>
+      <h1 class="font-mono text-sm tracking-widest text-gray-500 uppercase">Initializing Roadmap</h1>
+      <div class="mt-2 text-xs font-mono text-accent-primary">GAL.ROADMAP.BOOT</div>
+    </div>
+  </div>
+
+  <div id="top"></div>
+
+  <!-- HERO -->
+  <section class="relative w-full flex items-center justify-center overflow-hidden" style="min-height: 62vh; padding-top:64px;">
+    <canvas id="hero-canvas"></canvas>
+
+    <div class="absolute inset-0 z-[1] pointer-events-none">
+      <div class="absolute inset-0 gal-hero-gradient"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65"></div>
+      <div class="absolute inset-0 opacity-[0.06]"
+           style="background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 34px 34px;"></div>
+    </div>
+
+    <div class="relative z-10 w-full px-6 lg:px-12">
+      <div class="max-w-5xl mx-auto text-center opacity-0 animate-hero-pop">
+        <div class="font-mono text-[11px] text-gray-300/80 tracking-[0.35em] uppercase">
+          Gaul Acoustics Lab
+        </div>
+
+        <h1 class="mt-4 font-display text-white leading-[0.92] tracking-[0.06em] text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+            style="text-shadow: 0 0 18px rgba(255,255,255,0.07), 0 0 36px rgba(239,68,68,0.06);">
+          Roadmap
+        </h1>
+
+        <div class="mt-6 w-44 sm:w-52 mx-auto gal-accent-bar animate-sheen"></div>
+
+        <p class="mt-8 text-gray-200/85 max-w-3xl mx-auto font-light text-base md:text-lg leading-relaxed">
+          Publishable work, built in phases — with ongoing technical tracks.
+        </p>
+
+        <div class="mt-10">
+          <a href="#roadmap" class="inline-block text-center text-xs font-mono text-gray-200 hover:text-white transition-colors uppercase tracking-widest">
+            <span class="block">Enter</span>
+            <i class="fa-solid fa-arrow-down-long block mx-auto mt-2 animate-arrow-bob opacity-85"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="relative z-10 bg-void border-t border-white/10">
+    <section id="roadmap" class="px-6 lg:px-12 py-10 max-w-[1600px] mx-auto min-h-[calc(100vh-64px)] flex flex-col opacity-0 animate-fade-in-up">
+      <h2 class="font-mono text-xs font-bold text-gray-500 mb-6 uppercase tracking-widest flex items-center gap-4">
+        <span class="w-8 h-px bg-gray-800"></span>
+        Timeline
+      </h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        <!-- Left rail / legend -->
+        <aside class="lg:col-span-3 xl:col-span-2">
+          <div class="panel rounded-sm p-5 reveal d1">
+            <div class="flex items-center justify-between">
+              <div class="text-white font-bold uppercase tracking-wider text-sm">
+                <i class="fa-solid fa-compass mr-2 text-white/70"></i>Overview
+              </div>
+              <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Focus</span>
+            </div>
+
+            <div class="mt-4 space-y-3 text-sm text-gray-400 leading-relaxed">
+              <div class="text-[10px] font-mono uppercase tracking-widest text-gray-600">North Star</div>
+              <div class="text-gray-300">
+                Publishable, repeatable outputs. Less variance. More confidence.
+              </div>
+
+              <div class="pt-4 border-t border-white/10">
+                <div class="text-[10px] font-mono uppercase tracking-widest text-gray-600 mb-2">Tracks (always on)</div>
+                <div class="flex flex-wrap gap-2">
+                  <span class="chip">Filtering</span>
+                  <span class="chip">Theory</span>
+                  <span class="chip">Calibrations</span>
+                  <span class="chip">Fit protocol</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right main timeline -->
+        <section class="lg:col-span-9 xl:col-span-10">
+          <div class="panel rounded-sm p-6">
+            <div class="grid grid-cols-[24px_1fr] gap-4">
+
+              <!-- Spine -->
+              <div class="flex flex-col items-center">
+                <div class="dot cyan mt-1"></div>
+                <div class="spine flex-1 w-[2px] mt-3"></div>
+                <div class="dot red mt-3"></div>
+                <div class="spine flex-1 w-[2px] mt-3"></div>
+                <div class="dot gold mt-3"></div>
+                <div class="spine flex-1 w-[2px] mt-3"></div>
+                <div class="dot purple mt-3"></div>
+              </div>
+
+              <!-- Cards -->
+              <div class="space-y-4">
+
+                <!-- Phase 1 -->
+                <article class="phaseCard reveal d1">
+                  <div class="badgeNum">01</div>
+                  <div class="phaseInner">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-start gap-4">
+                        <div class="iconBox">
+                          <i class="fa-solid fa-shield-halved text-accent-cyan"></i>
+                        </div>
+                        <div>
+                          <div class="kicker">Now → 05/2026</div>
+                          <div class="phaseTitle">Ear Protection Verification</div>
+                          <div class="phaseSub">Release discipline + repeatability</div>
+                        </div>
+                      </div>
+                      <div class="hidden md:flex flex-wrap gap-2 justify-end">
+                        <span class="chip">Protocol</span>
+                        <span class="chip">Traceability</span>
+                      </div>
+                    </div>
+
+                    <p class="phaseDesc">
+                      Attenuation verification with strict fit control, logged conditions, and one-page publishable reports.
+                      The goal is less variance, more confidence.
+                    </p>
+                  </div>
+                </article>
+
+                <article class="phaseCard reveal d2">
+                  <div class="badgeNum">01+</div>
+                  <div class="phaseInner">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-start gap-4">
+                        <div class="iconBox">
+                          <i class="fa-solid fa-crosshairs text-accent-primary"></i>
+                        </div>
+                        <div>
+                          <div class="kicker">Current focus</div>
+                          <div class="phaseTitle">Measurement Integrity</div>
+                          <div class="phaseSub">Define what gets published</div>
+                        </div>
+                      </div>
+                      <div class="hidden md:flex flex-wrap gap-2 justify-end">
+                        <span class="chip">Repeatability</span>
+                        <span class="chip">Procedure</span>
+                      </div>
+                    </div>
+
+                    <p class="phaseDesc">
+                      Filters, theory, calibrations, and measurement improvements.
+                      This track feeds every phase and sets the standard for “official” results.
+                    </p>
+
+                    <div class="mt-4 flex flex-wrap gap-2">
+                      <span class="chip">Filtering</span>
+                      <span class="chip">Theory</span>
+                      <span class="chip">Calibrations</span>
+                      <span class="chip">Fit protocol</span>
+                    </div>
+                  </div>
+                </article>
+
+                <!-- Phase 2 -->
+                <article class="phaseCard reveal d3">
+                  <div class="badgeNum">02</div>
+                  <div class="phaseInner">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-start gap-4">
+                        <div class="iconBox">
+                          <i class="fa-solid fa-screwdriver-wrench text-accent-secondary"></i>
+                        </div>
+                        <div>
+                          <div class="kicker">Next</div>
+                          <div class="phaseTitle">Build Ear Protection</div>
+                          <div class="phaseSub">Prototype → validate → iterate</div>
+                        </div>
+                      </div>
+                      <div class="hidden md:flex flex-wrap gap-2 justify-end">
+                        <span class="chip">Materials</span>
+                        <span class="chip">Fit</span>
+                      </div>
+                    </div>
+
+                    <p class="phaseDesc">
+                      Develop your own ear protection using the verified measurement chain.
+                      Iterate with objective verification, then document outcomes in the same publication style.
+                    </p>
+                  </div>
+                </article>
+
+                <!-- Phase 3 -->
+                <article class="phaseCard reveal d4">
+                  <div class="badgeNum">03</div>
+                  <div class="phaseInner">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-start gap-4">
+                        <div class="iconBox">
+                          <i class="fa-solid fa-ear-listen text-accent-tertiary"></i>
+                        </div>
+                        <div>
+                          <div class="kicker">Later</div>
+                          <div class="phaseTitle">First IEM</div>
+                          <div class="phaseSub">Design loop + publishable reports</div>
+                        </div>
+                      </div>
+                      <div class="hidden md:flex flex-wrap gap-2 justify-end">
+                        <span class="chip">Targets</span>
+                        <span class="chip">DSP</span>
+                      </div>
+                    </div>
+
+                    <p class="phaseDesc">
+                      Once the measurement pipeline is stable and repeatable, transition into your first IEM design.
+                      The output remains the same: disciplined measurement + documentation.
+                    </p>
+                  </div>
+                </article>
+
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <section class="border-t border-white/10 pt-8 pb-10 mt-2 opacity-0 animate-fade-in-up delay-300">
+      <div class="px-6 lg:px-12 max-w-[1600px] mx-auto flex justify-end items-center text-xs">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-gray-600">© 2026 G.A.L.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function initReveal(){
+      const els = Array.from(document.querySelectorAll(".reveal"));
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce){ els.forEach(e => e.classList.add("in")); return; }
+
+      const io = new IntersectionObserver((entries) => {
+        for (const ent of entries){
+          if (ent.isIntersecting){
+            ent.target.classList.add("in");
+            io.unobserve(ent.target);
+          }
+        }
+      }, { threshold: 0.12, rootMargin: "0px 0px -10% 0px" });
+
+      els.forEach(e => io.observe(e));
+    }
+
+    function canvasWaves() {
+      const canvas = document.getElementById("hero-canvas");
+      if (!canvas) return;
+
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return;
+
+      const ctx = canvas.getContext("2d", { alpha:true });
+      let w = 0, h = 0, dpr = 1;
+      let raf = 0;
+
+      function resize() {
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = canvas.clientWidth || window.innerWidth;
+        h = canvas.clientHeight || Math.max(520, Math.floor(window.innerHeight * 0.62));
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a) {
+        ctx.beginPath();
+        const step = w < 640 ? 10 : 14;
+
+        const edgeFade = (x) => {
+          const u = x / w;
+          const fi = Math.min(1, u / 0.08);
+          const fo = Math.min(1, (1 - u) / 0.08);
+          return Math.max(0, Math.min(fi, fo));
+        };
+
+        for (let x = 0; x <= w + step; x += step) {
+          const y =
+            y0 +
+            (Math.sin(x * f1 + t * sp1) * amp +
+             Math.sin(x * f2 - t * sp2) * (amp * 0.55)) *
+            (0.55 + 0.45 * edgeFade(x));
+
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.lineWidth = lw;
+        ctx.strokeStyle = `rgba(255,255,255,${a})`;
+        ctx.stroke();
+      }
+
+      function frame() {
+        raf = requestAnimationFrame(frame);
+        ctx.clearRect(0, 0, w, h);
+
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, "rgba(255,255,255,0.02)");
+        g.addColorStop(0.5, "rgba(255,255,255,0.00)");
+        g.addColorStop(1, "rgba(255,255,255,0.02)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        const t = performance.now() * 0.001;
+
+        const bands = 7;
+        const top = h * 0.24;
+        const span = h * 0.54;
+        const gap = span / (bands - 1);
+
+        for (let i = 0; i < bands; i++) {
+          const y0 = top + i * gap;
+          const amp = Math.min(18, gap * 0.30) * (0.85 + i * 0.04);
+          const f1 = 0.010 + i * 0.00055;
+          const f2 = 0.016 + i * 0.00045;
+          const sp1 = 1.20 + i * 0.03;
+          const sp2 = 0.90 + i * 0.02;
+
+          const mid = Math.floor(bands / 2);
+          const lw = 1.2 + (i === mid ? 0.9 : 0.4);
+          const a = 0.045 + (i === mid ? 0.03 : 0.0);
+
+          drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a);
+        }
+      }
+
+      window.addEventListener("resize", () => {
+        cancelAnimationFrame(raf);
+        resize();
+        frame();
+      }, { passive:true });
+
+      resize();
+      frame();
+    }
+
+    window.addEventListener("load", () => {
+      canvasWaves();
+      initReveal();
+
+      setTimeout(() => {
+        const overlay = document.getElementById("intro-overlay");
+        if (overlay) overlay.classList.add("intro-hidden");
+      }, 1100);
+    });
+  </script>
+</body>
+</html>

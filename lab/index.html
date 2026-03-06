@@ -1,476 +1,484 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaul Acoustics Strive</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['IBM Plex Sans', 'sans-serif'],
-                        mono: ['IBM Plex Mono', 'monospace'],
-                    },
-                    colors: {
-                        'void': '#050505',
-                        'panel': '#0f0f10',
-                        'accent-primary': '#ef4444',   /* Red */
-                        'accent-secondary': '#eab308', /* Amber */
-                        'accent-tertiary': '#a855f7',  /* Purple */
-                        'accent-cyan': '#06b6d4',      /* Cyan */
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { background-color: #050505; color: #e0e0e0; font-family: 'IBM Plex Sans', sans-serif; overflow-x: hidden; }
-        
-        /* Intro Overlay */
-        #intro-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: #050505;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
-        }
-        .intro-hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>G.A.L. — Gaul Acoustics Lab</title>
 
-        /* Fluid Canvas */
-        #hero-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.4;
-        }
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        /* Text Gradient Animation */
-        .animate-gradient-text {
-            background-size: 200% auto;
-            animation: textGradient 4s linear infinite;
-        }
-        @keyframes textGradient {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 200% 50%; }
-        }
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet" />
 
-        /* Ambient Glow Utilities */
-        .glow-gold:hover {
-            box-shadow: 0 0 30px rgba(234, 179, 8, 0.1);
-            border-color: rgba(234, 179, 8, 0.4);
-        }
-        .glow-cyan:hover {
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.1);
-            border-color: rgba(6, 182, 212, 0.4);
-        }
-        .glow-purple:hover {
-            box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
-            border-color: rgba(168, 85, 247, 0.4);
-        }
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" referrerpolicy="no-referrer" />
 
-        /* Utilities */
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-500 { animation-delay: 500ms; }
-        .delay-700 { animation-delay: 700ms; }
-        
-        /* Grid Background */
-        .bg-grid {
-            background-size: 40px 40px;
-            background-image: 
-                linear-gradient(to right, #121212 1px, transparent 1px),
-                linear-gradient(to bottom, #121212 1px, transparent 1px);
-            mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
-        }
-    </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["IBM Plex Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"],
+            display: ["Cinzel Decorative", "serif"],
+          },
+          colors: {
+            void: "#050505",
+            panel: "#0f0f10",
+            "accent-primary": "#ef4444",
+            "accent-secondary": "#eab308",
+            "accent-tertiary": "#a855f7",
+            "accent-cyan": "#06b6d4",
+          },
+          animation: {
+            "fade-in-up": "fadeInUp .9s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "hero-pop": "heroPop 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "arrow-bob": "arrowBob 1.4s ease-in-out infinite",
+            "sheen": "sheen 10s linear infinite",
+          },
+          keyframes: {
+            fadeInUp: {
+              "0%": { opacity: "0", transform: "translateY(18px)" },
+              "100%": { opacity: "1", transform: "translateY(0)" },
+            },
+            heroPop: {
+              "0%": { opacity: "0", transform: "translateY(14px) scale(0.995)", filter: "blur(4px)" },
+              "100%": { opacity: "1", transform: "translateY(0) scale(1)", filter: "blur(0px)" },
+            },
+            arrowBob: {
+              "0%,100%": { transform: "translateY(0px)" },
+              "50%": { transform: "translateY(5px)" },
+            },
+            sheen: {
+              "0%": { backgroundPosition: "0% 50%" },
+              "100%": { backgroundPosition: "220% 50%" },
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { --nav-h: 64px; }
+    body { background:#050505; color:#e0e0e0; font-family:"IBM Plex Sans",sans-serif; overflow-x:hidden; }
+    section[id] { scroll-margin-top: calc(var(--nav-h) + 18px); }
+
+    #intro-overlay{
+      position:fixed; inset:0; background:#050505; z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      transition:opacity .8s ease-out, visibility .8s ease-out;
+    }
+    .intro-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+    #hero-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:.78; }
+
+    .gal-accent-bar{
+      height:2px; border-radius:999px;
+      background-image: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.10),
+        rgba(239,68,68,0.85),
+        rgba(255,255,255,0.18),
+        rgba(168,85,247,0.75),
+        rgba(234,179,8,0.65),
+        rgba(239,68,68,0.85),
+        rgba(239,68,68,0.10)
+      );
+      background-size: 260% 100%;
+    }
+
+    .gal-hero-gradient{
+      background: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.18),
+        rgba(234,179,8,0.10),
+        rgba(168,85,247,0.16),
+        rgba(239,68,68,0.18)
+      );
+      background-size: 240% 100%;
+      animation: sheen 12s linear infinite;
+      opacity: .32;
+      mix-blend-mode: screen;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior:auto !important; }
+      .animate-fade-in-up,.animate-hero-pop,.animate-arrow-bob,.animate-sheen{ animation:none !important; opacity:1 !important; transform:none !important; filter:none !important; }
+      #hero-canvas{ display:none; }
+    }
+  </style>
+
+  <!-- NAV partial slot -->
+  <div id="nav-slot"></div>
+
+  <!-- SITE ROOT for nav.js -->
+  <script>window.SITE_ROOT = ".";</script>
+  <link rel="stylesheet" href="./partials/nav.css">
+  <script src="./partials/nav.js" defer></script>
 </head>
+
 <body class="bg-void selection:bg-accent-primary selection:text-white min-h-screen flex flex-col">
 
-    <!-- Intro Sequence -->
-    <div id="intro-overlay">
-        <div class="text-center">
-            <div class="w-16 h-1 bg-accent-primary mx-auto mb-4 animate-pulse"></div>
-            <h1 class="font-mono text-sm tracking-widest text-gray-500 uppercase">Initializing Acoustic Arrays</h1>
-            <div class="mt-2 text-xs font-mono text-accent-primary">GAUL.SYS.BOOT</div>
-        </div>
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="text-center">
+      <div class="w-16 h-1 bg-accent-primary mx-auto mb-4 animate-pulse"></div>
+      <h1 class="font-mono text-sm tracking-widest text-gray-500 uppercase">Initializing Measurement Stack</h1>
+      <div class="mt-2 text-xs font-mono text-accent-primary">GAL.SYS.BOOT</div>
+    </div>
+  </div>
+
+  <div id="top"></div>
+
+  <section class="relative h-screen w-full flex items-center justify-center overflow-hidden" style="padding-top:64px;">
+    <canvas id="hero-canvas"></canvas>
+
+    <div class="absolute inset-0 z-[1] pointer-events-none">
+      <div class="absolute inset-0 gal-hero-gradient"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/38 via-black/10 to-black/62"></div>
+      <div class="absolute inset-0 opacity-[0.06]"
+           style="background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 34px 34px;"></div>
     </div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-50 bg-void/90 backdrop-blur-md border-b border-white/10 h-16 flex items-center justify-between px-6 lg:px-12 transition-all duration-300" id="navbar">
-        <a href="#" class="flex items-center gap-3 group cursor-pointer z-50">
-            <div class="w-3 h-3 bg-accent-primary transform rotate-45 group-hover:rotate-90 transition-transform duration-500 will-change-transform"></div>
-            <span class="font-bold tracking-tight text-white uppercase text-sm group-hover:text-accent-primary transition-colors block">Gaul Acoustics Strive</span>
-        </a>
-        
-        <!-- Desktop Menu -->
-        <div class="hidden md:flex gap-10 text-xs font-semibold tracking-wide text-gray-500">
-            <a href="#profile" class="hover:text-white transition-colors relative group">
-                ENGINEER
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-primary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#capabilities" class="hover:text-white transition-colors relative group">
-                CAPABILITIES
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-secondary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <a href="#inventory" class="hover:text-white transition-colors relative group">
-                INVENTORY
-                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent-tertiary transition-all duration-300 group-hover:w-full"></span>
-            </a>
-        </div>
-    </nav>
+    <div class="relative z-10 w-full px-6 lg:px-12">
+      <div class="max-w-5xl mx-auto text-center opacity-0 animate-hero-pop">
+        <h1 class="font-display text-white leading-[0.92] tracking-[0.06em] text-6xl sm:text-7xl md:text-8xl lg:text-9xl"
+            style="text-shadow: 0 0 18px rgba(255,255,255,0.07), 0 0 36px rgba(239,68,68,0.06);">
+          G.A.L.
+        </h1>
 
-    <!-- NEW HERO SECTION (Title Screen) -->
-    <section class="relative h-screen w-full flex items-center justify-center overflow-hidden">
-        <!-- Interactive Water/Wave Canvas -->
-        <canvas id="hero-canvas"></canvas>
-        
-        <!-- Hero Content -->
-        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto opacity-0 animate-fade-in-up delay-500">
-            <div class="inline-flex items-center gap-3 mb-8 border border-white/10 bg-black/20 backdrop-blur-md px-4 py-1.5 rounded-full w-fit mx-auto">
-                <span class="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></span>
-                <span class="text-[10px] font-mono text-gray-300 font-bold tracking-widest uppercase">Independent Research Facility</span>
+        <div class="mt-6 w-44 sm:w-52 mx-auto gal-accent-bar animate-sheen"></div>
+
+        <div class="mt-5 text-[11px] font-mono text-gray-300/80 tracking-[0.35em] uppercase">
+          Gaul Acoustics Lab
+        </div>
+
+        <p class="mt-9 text-gray-200/85 max-w-3xl mx-auto font-light text-lg md:text-xl leading-relaxed">
+          Engineering-focused lab for audio measurement and verification. Emphasis on repeatable procedures, traceable instrumentation,
+          and publication-ready documentation—spanning IEM measurements, ear protection evaluation, and loudspeaker system analysis.
+        </p>
+
+        <div class="mt-12">
+          <a href="#profile" class="inline-block text-center text-xs font-mono text-gray-200 hover:text-white transition-colors uppercase tracking-widest">
+            <span class="block">Initiate</span>
+            <i class="fa-solid fa-arrow-down-long block mx-auto mt-2 animate-arrow-bob opacity-85"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="relative z-10 bg-void border-t border-white/10">
+
+    <section id="profile" class="px-6 lg:px-12 py-24 max-w-[1600px] mx-auto">
+      <div class="grid lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-7">
+          <span class="text-accent-secondary font-bold text-xs uppercase tracking-widest mb-4 block">The Operator</span>
+          <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Gal Ben (Goby)</h2>
+          <p class="text-xl text-gray-400 font-light leading-relaxed mb-8 border-l-2 border-accent-secondary pl-6">
+            4th-Year Mechanical Engineering Student &amp; Research Assistant — Acoustics Laboratory (Tel Aviv University).
+          </p>
+          <p class="text-gray-500 leading-relaxed max-w-2xl">
+            Focused on measurement integrity: consistent procedures, controlled variables, and transparent reporting.
+          </p>
+        </div>
+
+        <div class="lg:col-span-5 grid gap-4">
+          <div class="bg-panel border border-white/10 p-6 hover:border-accent-primary/30 transition-colors group">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-white font-bold uppercase tracking-wider text-sm">Research Assistant</h3>
+              <span class="w-2 h-2 bg-accent-primary rounded-full group-hover:animate-pulse"></span>
             </div>
-
-            <h1 class="text-6xl md:text-8xl lg:text-9xl font-bold uppercase tracking-tighter leading-[0.8] text-white mb-8 drop-shadow-2xl">
-                Gaul<br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary via-orange-500 to-accent-primary animate-gradient-text">Strive.</span>
-            </h1>
-            
-            <p class="text-gray-400 max-w-xl mx-auto font-light text-lg md:text-xl leading-relaxed mb-12">
-                Forging absolute fidelity through unyielding mechanical discipline and rigorous verification.
-            </p>
-
-            <a href="#profile" class="inline-flex items-center gap-2 text-xs font-mono text-gray-500 hover:text-white transition-colors uppercase tracking-widest group">
-                Initiate
-                <svg class="w-4 h-4 transform group-hover:translate-y-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-            </a>
+            <p class="text-xs text-gray-500 font-mono">Wave propagation / academic research</p>
+          </div>
+          <div class="bg-panel border border-white/10 p-6 hover:border-accent-secondary/30 transition-colors group">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-white font-bold uppercase tracking-wider text-sm">FOH Engineer</h3>
+              <span class="w-2 h-2 bg-accent-secondary rounded-full group-hover:animate-pulse"></span>
+            </div>
+            <p class="text-xs text-gray-500 font-mono">Live sound reinforcement / system tech</p>
+          </div>
+          <div class="bg-panel border border-white/10 p-6 hover:border-accent-tertiary/30 transition-colors group">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-white font-bold uppercase tracking-wider text-sm">Studio Engineer</h3>
+              <span class="w-2 h-2 bg-accent-tertiary rounded-full group-hover:animate-pulse"></span>
+            </div>
+            <p class="text-xs text-gray-500 font-mono">Mixing &amp; mastering / spectral balance</p>
+          </div>
         </div>
+      </div>
     </section>
 
-    <main class="relative z-10 bg-void border-t border-white/10">
-        
-        <!-- SECTION 1: PROFILE & ENGINEER -->
-        <section id="profile" class="px-6 lg:px-12 py-24 max-w-[1600px] mx-auto">
-            <div class="grid lg:grid-cols-12 gap-12 items-center">
-                <!-- Text -->
-                <div class="lg:col-span-7">
-                    <span class="text-accent-secondary font-bold text-xs uppercase tracking-widest mb-4 block">The Operator</span>
-                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Gal Ben (Goby)</h2>
-                    <p class="text-xl text-gray-400 font-light leading-relaxed mb-8 border-l-2 border-accent-secondary pl-6">
-                        4th-Year Mechanical Engineering Student & Research Assistant at the Acoustics Laboratory (Tel Aviv University).
-                    </p>
-                    <p class="text-gray-500 leading-relaxed max-w-2xl">
-                        Gaul Acoustics Strive was born from a refusal to accept the chaos of the consumer market. Here, we struggle against variance. We fight for the perfect impulse response. It is a tireless march toward sonic truth.
-                    </p>
-                </div>
+    <section id="capabilities" class="px-6 lg:px-12 py-12 max-w-[1600px] mx-auto border-t border-white/5">
+      <h2 class="font-mono text-xs font-bold text-gray-500 mb-8 uppercase tracking-widest flex items-center gap-4">
+        <span class="w-8 h-px bg-gray-800"></span>
+        Operations
+      </h2>
 
-                <!-- Roles Grid -->
-                <div class="lg:col-span-5 grid gap-4">
-                    <div class="bg-panel border border-white/10 p-6 hover:border-accent-primary/30 transition-colors group">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-white font-bold uppercase tracking-wider text-sm">Research Assistant</h3>
-                            <span class="w-2 h-2 bg-accent-primary rounded-full group-hover:animate-pulse"></span>
-                        </div>
-                        <p class="text-xs text-gray-500 font-mono">Academic Research (TAU) / Wave Propagation</p>
-                    </div>
-                    <div class="bg-panel border border-white/10 p-6 hover:border-accent-secondary/30 transition-colors group">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-white font-bold uppercase tracking-wider text-sm">FOH Engineer</h3>
-                            <span class="w-2 h-2 bg-accent-secondary rounded-full group-hover:animate-pulse"></span>
-                        </div>
-                        <p class="text-xs text-gray-500 font-mono">Live Sound Reinforcement / System Tech</p>
-                    </div>
-                    <div class="bg-panel border border-white/10 p-6 hover:border-accent-tertiary/30 transition-colors group">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-white font-bold uppercase tracking-wider text-sm">Studio Engineer</h3>
-                            <span class="w-2 h-2 bg-accent-tertiary rounded-full group-hover:animate-pulse"></span>
-                        </div>
-                        <p class="text-xs text-gray-500 font-mono">Mixing & Mastering / Spectral Balance</p>
-                    </div>
-                </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-panel border-t-2 border-accent-secondary p-8 relative overflow-hidden rounded-sm hover:bg-white/[0.02] transition-colors">
+          <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none font-mono">01</div>
+          <div class="relative z-10">
+            <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">
+              <i class="fa-solid fa-magnifying-glass-waveform mr-2"></i>Forensics
+            </h3>
+            <p class="text-xs text-gray-400 leading-relaxed">Impedance, T/S profiling, distortion, and failure analysis.</p>
+          </div>
+        </div>
+
+        <div class="bg-panel border-t-2 border-accent-secondary p-8 relative overflow-hidden rounded-sm hover:bg-white/[0.02] transition-colors">
+          <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none font-mono">02</div>
+          <div class="relative z-10">
+            <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">
+              <i class="fa-solid fa-cube mr-2"></i>Enclosures
+            </h3>
+            <p class="text-xs text-gray-400 leading-relaxed">FEA-driven structures to control resonance and diffraction.</p>
+          </div>
+        </div>
+
+        <div class="bg-panel border-t-2 border-accent-secondary p-8 relative overflow-hidden rounded-sm hover:bg-white/[0.02] transition-colors">
+          <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none font-mono">03</div>
+          <div class="relative z-10">
+            <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">
+              <i class="fa-solid fa-ear-listen mr-2"></i>IEM Tests
+            </h3>
+            <p class="text-xs text-gray-400 leading-relaxed">IEC 60318-4 / 711 measurements with disciplined fit procedure.</p>
+          </div>
+        </div>
+
+        <div class="bg-panel border-t-2 border-accent-secondary p-8 relative overflow-hidden rounded-sm hover:bg-white/[0.02] transition-colors">
+          <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none font-mono">04</div>
+          <div class="relative z-10">
+            <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">
+              <i class="fa-solid fa-sliders mr-2"></i>Filtering
+            </h3>
+            <p class="text-xs text-gray-400 leading-relaxed">DSP for targets, phase control, and crossover alignment.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="inventory" class="px-6 lg:px-12 py-12 max-w-[1600px] mx-auto border-t border-white/5">
+      <div class="grid lg:grid-cols-2 gap-8">
+        <div class="bg-panel border border-white/10 overflow-hidden rounded-sm">
+          <div class="p-6 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
+            <h3 class="font-bold text-sm text-white uppercase tracking-wider flex items-center gap-3">
+              <span class="w-1 h-4 bg-accent-tertiary"></span>
+              Lab Inventory
+            </h3>
+            <span class="text-[10px] font-mono text-accent-tertiary bg-accent-tertiary/10 px-2 py-1 rounded">Traceable Standards</span>
+          </div>
+          <div class="divide-y divide-white/5">
+            <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors">
+              <div>
+                <span class="block text-white font-bold text-sm mb-1">Bruel &amp; Kjaer 4199</span>
+                <span class="text-xs text-gray-500 font-mono">IEC 60318-4 (711) Coupler</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] font-bold text-white bg-white/10 px-2 py-1 rounded">REF</span>
+                <span class="block text-[10px] text-gray-600 font-mono mt-1">CAL: 02/2026</span>
+              </div>
             </div>
-        </section>
-
-        <!-- SECTION 2: CAPABILITIES -->
-        <section id="capabilities" class="px-6 lg:px-12 py-12 max-w-[1600px] mx-auto border-t border-white/5">
-            <h2 class="font-mono text-xs font-bold text-gray-500 mb-8 uppercase tracking-widest flex items-center gap-4">
-                <span class="w-8 h-px bg-gray-800"></span>
-                Operations
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <!-- Card 1 -->
-                <div class="bg-panel border-t-2 border-accent-secondary p-8 glow-gold group relative overflow-hidden h-full rounded-sm hover:bg-white/[0.02] transition-colors duration-300">
-                    <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none group-hover:text-accent-secondary/10 transition-colors duration-500 font-mono group-hover:scale-105 transform">01</div>
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">Forensics</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">Interrogating drivers. T/S profiling, impedance sweeping, and distortion analysis to expose flaws.</p>
-                    </div>
-                </div>
-
-                <!-- Card 2 -->
-                <div class="bg-panel border-t-2 border-accent-secondary p-8 glow-gold group relative overflow-hidden h-full rounded-sm hover:bg-white/[0.02] transition-colors duration-300">
-                    <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none group-hover:text-accent-secondary/10 transition-colors duration-500 font-mono group-hover:scale-105 transform">02</div>
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">Enclosures</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">Constructing inert vessels. FEA-optimized designs that crush resonance and mitigate standing waves.</p>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="bg-panel border-t-2 border-accent-secondary p-8 glow-gold group relative overflow-hidden h-full rounded-sm hover:bg-white/[0.02] transition-colors duration-300">
-                    <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none group-hover:text-accent-secondary/10 transition-colors duration-500 font-mono group-hover:scale-105 transform">03</div>
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">IEM Tests</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">The IEC 711 Battle Test. Rigorous frequency verification to ensure absolute consistency.</p>
-                    </div>
-                </div>
-
-                <!-- Card 4 -->
-                <div class="bg-panel border-t-2 border-accent-secondary p-8 glow-gold group relative overflow-hidden h-full rounded-sm hover:bg-white/[0.02] transition-colors duration-300">
-                    <div class="absolute -right-4 -bottom-8 text-[120px] font-bold text-white/5 leading-none select-none pointer-events-none group-hover:text-accent-secondary/10 transition-colors duration-500 font-mono group-hover:scale-105 transform">04</div>
-                    <div class="relative z-10">
-                        <h3 class="font-bold text-white text-sm uppercase mb-3 tracking-widest text-accent-secondary">Filtering</h3>
-                        <p class="text-xs text-gray-400 leading-relaxed group-hover:text-gray-200 transition-colors duration-300">Mathematical correction. Generating DSP filters for perfect phase linearization and crossover alignment.</p>
-                    </div>
-                </div>
+            <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors">
+              <div>
+                <span class="block text-white font-bold text-sm mb-1">Bruel &amp; Kjaer 1704</span>
+                <span class="text-xs text-gray-500 font-mono">CCLD / ICP Power Supply</span>
+              </div>
+              <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Conditioning</span>
             </div>
-        </section>
-
-        <!-- SECTION 3: INVENTORY & STACK -->
-        <section id="inventory" class="px-6 lg:px-12 py-12 max-w-[1600px] mx-auto border-t border-white/5">
-            <div class="grid lg:grid-cols-2 gap-8">
-
-                <!-- Left: Hardware Rack -->
-                <div class="bg-panel border border-white/10 relative z-10 overflow-hidden rounded-sm glow-purple">
-                    <div class="p-6 border-b border-white/10 flex justify-between items-center relative z-10 bg-white/[0.02]">
-                        <h3 class="font-bold text-sm text-white uppercase tracking-wider flex items-center gap-3">
-                            <span class="w-1 h-4 bg-accent-tertiary"></span>
-                            Lab Inventory
-                        </h3>
-                        <span class="text-[10px] font-mono text-accent-tertiary bg-accent-tertiary/10 px-2 py-1 rounded">Traceable Standards</span>
-                    </div>
-                    
-                    <div class="divide-y divide-white/5 relative z-10">
-                        <!-- Item -->
-                        <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors duration-200 group">
-                            <div>
-                                <span class="block text-white font-bold text-sm group-hover:text-accent-tertiary transition-colors mb-1">Bruel & Kjaer 4199</span>
-                                <span class="text-xs text-gray-500 font-mono">IEC 60318-4 (711) Coupler</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-white bg-white/10 px-2 py-1 rounded">REF</span>
-                                <span class="block text-[10px] text-gray-600 font-mono mt-1">CAL: 02/2026</span>
-                            </div>
-                        </div>
-                        <!-- Item -->
-                        <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors duration-200 group">
-                            <div>
-                                <span class="block text-white font-bold text-sm group-hover:text-accent-tertiary transition-colors mb-1">Bruel & Kjaer 1704</span>
-                                <span class="text-xs text-gray-500 font-mono">CCLD / ICP Power Supply</span>
-                            </div>
-                            <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">Conditioning</span>
-                        </div>
-                        <!-- Item -->
-                        <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors duration-200 group">
-                            <div>
-                                <span class="block text-white font-bold text-sm group-hover:text-accent-tertiary transition-colors mb-1">Presonus 22VSL</span>
-                                <span class="text-xs text-gray-500 font-mono">Audio Interface</span>
-                            </div>
-                            <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">ADC / DAC</span>
-                        </div>
-                        <!-- Item -->
-                        <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors duration-200 group">
-                            <div>
-                                <span class="block text-white font-bold text-sm group-hover:text-accent-tertiary transition-colors mb-1">Behringer FCA2020</span>
-                                <span class="text-xs text-gray-500 font-mono">Audio Interface</span>
-                            </div>
-                            <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">ADC / DAC</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right: Computing Stack -->
-                <div class="bg-panel border border-white/10 flex flex-col relative z-10 overflow-hidden rounded-sm glow-cyan">
-                    
-                    <div class="p-6 border-b border-white/10 relative z-10 bg-white/[0.02] flex justify-between items-center">
-                        <h3 class="font-bold text-sm text-white uppercase tracking-wider flex items-center gap-3">
-                            <span class="w-1 h-4 bg-accent-cyan"></span>
-                            Computational Stack
-                        </h3>
-                        <div class="flex gap-1">
-                            <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse"></span>
-                            <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse delay-100"></span>
-                            <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse delay-200"></span>
-                        </div>
-                    </div>
-                    
-                    <div class="p-8 flex-grow bg-void/30 relative z-10">
-                        <div class="space-y-8">
-                            
-                            <div class="flex gap-6 group cursor-default">
-                                <span class="text-accent-cyan font-bold font-mono group-hover:text-white transition-colors duration-300 text-lg">01</span>
-                                <div>
-                                    <span class="text-white font-bold block text-base group-hover:text-accent-cyan transition-colors duration-300 mb-1">VituixCAD</span>
-                                    <span class="text-gray-500 text-xs font-mono">System Simulation & Diffraction Modeling</span>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-6 group cursor-default">
-                                <span class="text-accent-cyan font-bold font-mono group-hover:text-white transition-colors duration-300 text-lg">02</span>
-                                <div>
-                                    <span class="text-white font-bold block text-base group-hover:text-accent-cyan transition-colors duration-300 mb-1">MATLAB & Python</span>
-                                    <span class="text-gray-500 text-xs font-mono">Numerical Analysis & Custom Scripting</span>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-6 group cursor-default">
-                                <span class="text-accent-cyan font-bold font-mono group-hover:text-white transition-colors duration-300 text-lg">03</span>
-                                <div>
-                                    <span class="text-white font-bold block text-base group-hover:text-accent-cyan transition-colors duration-300 mb-1">ARTA & REW</span>
-                                    <span class="text-gray-500 text-xs font-mono">Impulse Response & Sine Sweep Measurement</span>
-                                </div>
-                            </div>
-
-                        </div>
-                        
-                        <div class="mt-12 pt-6 border-t border-dashed border-white/10 text-xs text-gray-600 italic">
-                            "Victory is measured in precision. Control is absolute."
-                        </div>
-                    </div>
-                </div>
-
+            <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors">
+              <div>
+                <span class="block text-white font-bold text-sm mb-1">Presonus 22VSL</span>
+                <span class="text-xs text-gray-500 font-mono">Audio Interface</span>
+              </div>
+              <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">ADC / DAC</span>
             </div>
-        </section>
-
-        <!-- SECTION 4: FUTURE & FOOTER -->
-        <section id="future" class="border-t border-white/10 pt-10 pb-12 mt-4 opacity-0 animate-fade-in-up delay-300">
-            <div class="px-6 lg:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-xs">
-                
-                <div class="flex flex-col md:flex-row md:items-center gap-6">
-                    <span class="font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></span>
-                        Development Roadmap
-                    </span>
-                    <div class="flex gap-3">
-                        <span class="text-gray-300 border border-white/10 px-3 py-1.5 bg-white/5 rounded hover:bg-white/10 transition-colors cursor-default font-mono">IEM & Ear Protection</span>
-                        <span class="text-gray-300 border border-white/10 px-3 py-1.5 bg-white/5 rounded hover:bg-white/10 transition-colors cursor-default font-mono">Commercial Validation</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-8 font-medium text-gray-500 uppercase">
-                    <span>&copy; 2026 Gaul Acoustics Strive</span>
-                    <a href="https://ggaall98.github.io/GobyOS-2025/" class="hover:text-white transition-colors" target="_blank">Contact</a>
-                    <a href="#" class="hover:text-white transition-colors">LinkedIn</a>
-                </div>
+            <div class="p-6 flex justify-between items-center hover:bg-white/5 transition-colors">
+              <div>
+                <span class="block text-white font-bold text-sm mb-1">Behringer FCA2020</span>
+                <span class="text-xs text-gray-500 font-mono">Audio Interface</span>
+              </div>
+              <span class="text-[10px] font-medium text-gray-500 uppercase tracking-widest">ADC / DAC</span>
             </div>
-        </section>
+          </div>
+        </div>
 
-    </main>
+        <div class="bg-panel border border-white/10 overflow-hidden rounded-sm">
+          <div class="p-6 border-b border-white/10 bg-white/[0.02] flex justify-between items-center">
+            <h3 class="font-bold text-sm text-white uppercase tracking-wider flex items-center gap-3">
+              <span class="w-1 h-4 bg-accent-cyan"></span>
+              Computational Stack
+            </h3>
+            <div class="flex gap-1" aria-hidden="true">
+              <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse"></span>
+              <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse delay-100"></span>
+              <span class="w-1 h-1 bg-accent-cyan rounded-full animate-pulse delay-200"></span>
+            </div>
+          </div>
 
-    <!-- JS for Canvas & UI -->
-    <script>
-        // Canvas Animation
-        const canvas = document.getElementById('hero-canvas');
-        const ctx = canvas.getContext('2d');
-        
-        let width, height;
-        let lines = [];
-        const gap = 30;
-        let mouse = { x: 0, y: 0 };
-        
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            initLines();
-        }
-        
-        function initLines() {
-            lines = [];
-            for (let y = 0; y < height + gap; y += gap) {
-                let points = [];
-                for (let x = 0; x < width + gap; x += gap) {
-                    points.push({
-                        x: x,
-                        y: y,
-                        originX: x,
-                        originY: y
-                    });
-                }
-                lines.push(points);
-            }
-        }
-        
-        function update() {
-            ctx.clearRect(0, 0, width, height);
-            
-            const time = Date.now() * 0.002;
-            
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; 
-            ctx.lineWidth = 1;
+          <div class="p-8 bg-void/30">
+            <div class="space-y-8">
+              <div class="flex gap-6">
+                <span class="text-accent-cyan font-bold font-mono text-lg">01</span>
+                <div>
+                  <span class="text-white font-bold block text-base mb-1">VituixCAD</span>
+                  <span class="text-gray-500 text-xs font-mono">System simulation &amp; diffraction modeling</span>
+                </div>
+              </div>
+              <div class="flex gap-6">
+                <span class="text-accent-cyan font-bold font-mono text-lg">02</span>
+                <div>
+                  <span class="text-white font-bold block text-base mb-1">MATLAB &amp; Python</span>
+                  <span class="text-gray-500 text-xs font-mono">Numerical analysis &amp; custom scripting</span>
+                </div>
+              </div>
+              <div class="flex gap-6">
+                <span class="text-accent-cyan font-bold font-mono text-lg">03</span>
+                <div>
+                  <span class="text-white font-bold block text-base mb-1">ARTA &amp; REW</span>
+                  <span class="text-gray-500 text-xs font-mono">Impulse response &amp; sweep measurement</span>
+                </div>
+              </div>
+            </div>
 
-            for (let i = 0; i < lines.length; i++) {
-                const points = lines[i];
-                for (let j = 0; j < points.length; j++) {
-                    const p = points[j];
-                    const dist = Math.sqrt((p.x - mouse.x)**2 + (p.y - mouse.y)**2);
-                    const mouseEffect = Math.max(0, (1000 - dist) / 1000);
-                    
-                    const waveY = Math.sin(j * 0.1 + time) * 10 + Math.sin(i * 0.1 + time * 0.5) * 10;
-                    const interactionY = Math.sin(dist * 0.05 - time * 5) * 20 * mouseEffect;
+            <div class="mt-12 pt-6 border-t border-dashed border-white/10 text-xs text-gray-600 italic">
+              "Victory is measured in precision. Control is absolute."
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                    p.x = p.originX;
-                    p.y = p.originY + waveY + interactionY;
+    <section id="future" class="border-t border-white/10 pt-10 pb-12 mt-4 opacity-0 animate-fade-in-up delay-300">
+      <div class="px-6 lg:px-12 max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 text-xs">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <span class="font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-accent-primary animate-pulse"></span>
+            Development Roadmap
+          </span>
+          <div class="flex gap-3">
+            <span class="text-gray-300 border border-white/10 px-3 py-1.5 bg-white/5 rounded font-mono">IEM &amp; Ear Protection</span>
+            <span class="text-gray-300 border border-white/10 px-3 py-1.5 bg-white/5 rounded font-mono">Commercial Validation</span>
+          </div>
+        </div>
 
-                    if (j === 0) {
-                        ctx.moveTo(p.x, p.y);
-                    } else {
-                        ctx.lineTo(p.x, p.y);
-                    }
-                }
-            }
-            ctx.stroke();
-            requestAnimationFrame(update);
-        }
-        
-        window.addEventListener('resize', resize);
-        window.addEventListener('mousemove', e => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        
-        window.onload = () => {
-            resize();
-            update();
-            setTimeout(() => {
-                document.getElementById('intro-overlay').classList.add('intro-hidden');
-            }, 1500); 
+        <div class="flex items-center gap-8 font-medium text-gray-500 uppercase">
+          <span>&copy; 2026 G.A.L.</span>
+          <a href="https://ggaall98.github.io/personal/" class="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Contact</a>
+          <a href="https://www.linkedin.com/in/gal-ben/" class="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function setNavHeightVar() {
+      const nav = document.getElementById("navbar");
+      if (!nav) return;
+      document.documentElement.style.setProperty("--nav-h", `${Math.round(nav.getBoundingClientRect().height || 64)}px`);
+    }
+
+    // HERO WAVES (parallel ribbons, no collisions)
+    function canvasWaves() {
+      const canvas = document.getElementById("hero-canvas");
+      if (!canvas) return;
+
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return;
+
+      const ctx = canvas.getContext("2d", { alpha:true });
+      let w = 0, h = 0, dpr = 1;
+      let raf = 0;
+
+      function resize() {
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = canvas.clientWidth || window.innerWidth;
+        h = canvas.clientHeight || window.innerHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a) {
+        ctx.beginPath();
+        const step = w < 640 ? 10 : 14;
+
+        const edgeFade = (x) => {
+          const u = x / w;
+          const fi = Math.min(1, u / 0.08);
+          const fo = Math.min(1, (1 - u) / 0.08);
+          return Math.max(0, Math.min(fi, fo));
         };
-    </script>
 
+        for (let x = 0; x <= w + step; x += step) {
+          const y =
+            y0 +
+            (Math.sin(x * f1 + t * sp1) * amp +
+             Math.sin(x * f2 - t * sp2) * (amp * 0.55)) *
+            (0.55 + 0.45 * edgeFade(x));
+
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.lineWidth = lw;
+        ctx.strokeStyle = `rgba(255,255,255,${a})`;
+        ctx.stroke();
+      }
+
+      function frame() {
+        raf = requestAnimationFrame(frame);
+        ctx.clearRect(0, 0, w, h);
+
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, "rgba(255,255,255,0.02)");
+        g.addColorStop(0.5, "rgba(255,255,255,0.00)");
+        g.addColorStop(1, "rgba(255,255,255,0.02)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        const t = performance.now() * 0.001;
+
+        const bands = 7;
+        const top = h * 0.22;
+        const span = h * 0.58;
+        const gap = span / (bands - 1);
+
+        for (let i = 0; i < bands; i++) {
+          const y0 = top + i * gap;
+          const amp = Math.min(18, gap * 0.30) * (0.85 + i * 0.04);
+          const f1 = 0.010 + i * 0.00055;
+          const f2 = 0.016 + i * 0.00045;
+          const sp1 = 1.20 + i * 0.03;
+          const sp2 = 0.90 + i * 0.02;
+          const mid = Math.floor(bands / 2);
+          const lw = 1.2 + (i === mid ? 0.9 : 0.4);
+          const a = 0.045 + (i === mid ? 0.03 : 0.0);
+
+          drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a);
+        }
+      }
+
+      window.addEventListener("resize", () => {
+        cancelAnimationFrame(raf);
+        resize();
+        frame();
+      }, { passive:true });
+
+      resize();
+      frame();
+    }
+
+    window.addEventListener("load", () => {
+      setNavHeightVar();
+      canvasWaves();
+
+      setTimeout(() => {
+        const overlay = document.getElementById("intro-overlay");
+        if (overlay) overlay.classList.add("intro-hidden");
+      }, 1500);
+    });
+
+    window.addEventListener("resize", setNavHeightVar, { passive: true });
+  </script>
 </body>
 </html>

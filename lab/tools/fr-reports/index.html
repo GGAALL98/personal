@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>G.A.L. — Frequency Response Reports</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-3.3.0.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" referrerpolicy="no-referrer" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["IBM Plex Sans", "sans-serif"],
+            mono: ["IBM Plex Mono", "monospace"],
+            display: ["Cinzel Decorative", "serif"],
+          },
+          colors: {
+            void: "#050505",
+            panel: "#0f0f10",
+            "accent-primary": "#ef4444",
+            "accent-secondary": "#eab308",
+            "accent-tertiary": "#a855f7",
+            "accent-cyan": "#06b6d4",
+          },
+          animation: {
+            "fade-in-up": "fadeInUp .9s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "hero-pop": "heroPop 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "arrow-bob": "arrowBob 1.4s ease-in-out infinite",
+            "sheen": "sheen 10s linear infinite",
+          },
+          keyframes: {
+            fadeInUp: { "0%": { opacity: "0", transform: "translateY(18px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+            heroPop: { "0%": { opacity: "0", transform: "translateY(14px) scale(0.995)", filter: "blur(4px)" }, "100%": { opacity: "1", transform: "translateY(0) scale(1)", filter: "blur(0px)" } },
+            arrowBob: { "0%,100%": { transform: "translateY(0px)" }, "50%": { transform: "translateY(5px)" } },
+            sheen: { "0%": { backgroundPosition: "0% 50%" }, "100%": { backgroundPosition: "220% 50%" } },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { --nav-h: 64px; }
+    body { background:#050505; color:#e0e0e0; font-family:"IBM Plex Sans",sans-serif; overflow-x:hidden; }
+    section[id] { scroll-margin-top: calc(var(--nav-h) + 18px); }
+
+    #intro-overlay{
+      position:fixed; inset:0; background:#050505; z-index:100;
+      display:flex; align-items:center; justify-content:center;
+      transition:opacity .8s ease-out, visibility .8s ease-out;
+    }
+    .intro-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+    #hero-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; opacity:.78; }
+
+    .gal-accent-bar{
+      height:2px; border-radius:999px;
+      background-image: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.10),
+        rgba(239,68,68,0.85),
+        rgba(255,255,255,0.18),
+        rgba(168,85,247,0.75),
+        rgba(234,179,8,0.65),
+        rgba(239,68,68,0.85),
+        rgba(239,68,68,0.10)
+      );
+      background-size: 260% 100%;
+    }
+
+    .gal-hero-gradient{
+      background: linear-gradient(
+        90deg,
+        rgba(239,68,68,0.18),
+        rgba(234,179,8,0.10),
+        rgba(168,85,247,0.16),
+        rgba(239,68,68,0.18)
+      );
+      background-size: 240% 100%;
+      animation: sheen 12s linear infinite;
+      opacity: .32;
+      mix-blend-mode: screen;
+    }
+
+    .panel { background:#0f0f10; border:1px solid rgba(255,255,255,.10); }
+    .input { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.10); }
+    .input:focus { outline:none; border-color: rgba(239,68,68,.65); }
+    .btn { border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); }
+    .btn:hover { border-color:rgba(239,68,68,.55); background:rgba(239,68,68,.10); }
+
+    .tabsWrap{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); }
+    .tabBtn{
+      position:relative;
+      padding:.65rem 1.0rem;
+      font-size:.78rem;
+      border-radius:.75rem;
+      color:rgba(229,231,235,.92);
+      background:transparent;
+      border:1px solid transparent;
+      transition:all .15s ease;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      font-family:"IBM Plex Mono",monospace;
+    }
+    .tabBtn:hover{ background:rgba(255,255,255,.04); }
+    .tabBtnOn{
+      background:rgba(239,68,68,.10);
+      border-color:rgba(239,68,68,.55);
+      color:white;
+    }
+    .tabBtnOn::after{
+      content:"";
+      position:absolute;
+      left:.85rem; right:.85rem; bottom:-9px;
+      height:2px;
+      border-radius:999px;
+      background:rgba(239,68,68,.85);
+    }
+
+    .fadeSwap{ animation: fadeInUp .35s cubic-bezier(0.16,1,0.3,1) both; }
+
+    .dd { position:relative; }
+    .dd-panel{
+      position:absolute;
+      left:0;
+      right:auto;
+      top:calc(100% + 12px);
+      width:18rem;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(6px);
+      transition:opacity .18s ease, transform .18s ease;
+      z-index:9999;
+    }
+    .dd:hover .dd-panel,
+    .dd:focus-within .dd-panel{
+      opacity:1;
+      pointer-events:auto;
+      transform:translateY(0px);
+    }
+
+    .dd-panel::before{
+      content:"";
+      position:absolute;
+      left:0; right:0;
+      top:-14px;
+      height:14px;
+    }
+
+    .dd.right-open .dd-panel{
+      left:auto;
+      right:0;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      html{ scroll-behavior:auto !important; }
+      .animate-fade-in-up,.animate-hero-pop,.animate-arrow-bob,.animate-sheen{ animation:none !important; opacity:1 !important; transform:none !important; filter:none !important; }
+      #hero-canvas{ display:none; }
+    }
+  </style>
+
+  <div id="nav-slot"></div>
+
+  <script>window.SITE_ROOT = "../..";</script>
+  <link rel="stylesheet" href="../../partials/nav.css">
+  <script src="../../partials/nav.js" defer></script>
+</head>
+
+<body class="bg-void selection:bg-accent-primary selection:text-white min-h-screen flex flex-col">
+
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="text-center">
+      <div class="w-16 h-1 bg-accent-primary mx-auto mb-4 animate-pulse"></div>
+      <h1 class="font-mono text-sm tracking-widest text-gray-500 uppercase">Initializing Report Index</h1>
+      <div class="mt-2 text-xs font-mono text-accent-primary">GAL.REPORTS.BOOT</div>
+    </div>
+  </div>
+
+  <div id="top"></div>
+
+  <section class="relative w-full flex items-center justify-center overflow-hidden" style="min-height: 62vh; padding-top:64px;">
+    <canvas id="hero-canvas"></canvas>
+
+    <div class="absolute inset-0 z-[1] pointer-events-none">
+      <div class="absolute inset-0 gal-hero-gradient"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/65"></div>
+      <div class="absolute inset-0 opacity-[0.06]"
+           style="background-image: radial-gradient(rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 34px 34px;"></div>
+    </div>
+
+    <div class="relative z-10 w-full px-6 lg:px-12">
+      <div class="max-w-5xl mx-auto text-center opacity-0 animate-hero-pop">
+        <div class="font-mono text-[11px] text-gray-300/80 tracking-[0.35em] uppercase">
+          Gaul Acoustics Lab
+        </div>
+
+        <h1 class="mt-4 font-display text-white leading-[0.92] tracking-[0.06em] text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+            style="text-shadow: 0 0 18px rgba(255,255,255,0.07), 0 0 36px rgba(239,68,68,0.06);">
+          Frequency Response<br/>Reports
+        </h1>
+
+        <div class="mt-6 w-44 sm:w-52 mx-auto gal-accent-bar animate-sheen"></div>
+
+        <p class="mt-8 text-gray-200/85 max-w-3xl mx-auto font-light text-base md:text-lg leading-relaxed">
+          Select a model. View the report. Explore the curve.
+        </p>
+
+        <div class="mt-10">
+          <a href="#reports" class="inline-block text-center text-xs font-mono text-gray-200 hover:text-white transition-colors uppercase tracking-widest">
+            <span class="block">Enter</span>
+            <i class="fa-solid fa-arrow-down-long block mx-auto mt-2 animate-arrow-bob opacity-85"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="relative z-10 bg-void border-t border-white/10">
+    <section id="reports" class="px-6 lg:px-12 py-10 max-w-[1600px] mx-auto min-h-[calc(100vh-64px)] flex flex-col opacity-0 animate-fade-in-up">
+      <h2 class="font-mono text-xs font-bold text-gray-500 mb-6 uppercase tracking-widest flex items-center gap-4">
+        <span class="w-8 h-px bg-gray-800"></span>
+        Report Browser
+      </h2>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
+        <!-- Left -->
+        <aside class="lg:col-span-3 xl:col-span-2">
+          <div class="panel rounded-sm p-5">
+            <div class="flex items-center justify-between">
+              <div class="text-white font-bold uppercase tracking-wider text-sm">
+                <i class="fa-solid fa-filter mr-2 text-white/70"></i>Filters
+              </div>
+              <span class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Index</span>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <div>
+                <label class="block text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">Search</label>
+                <input id="q" class="input w-full rounded-sm px-3 py-2 text-sm text-white font-mono"
+                       placeholder="KZ PR2..." />
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-1">Brand</label>
+                <select id="brand" class="input w-full rounded-sm px-3 py-2 text-sm text-white font-mono">
+                  <option value="">All</option>
+                </select>
+              </div>
+
+              <button id="reset" class="btn rounded-sm px-3 py-2 text-xs text-white w-full font-mono uppercase tracking-widest">
+                <i class="fa-solid fa-rotate mr-2"></i>Reset
+              </button>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-white/10">
+              <div id="count" class="text-[10px] text-gray-500 font-mono uppercase tracking-widest">0 reports</div>
+            </div>
+          </div>
+
+          <div class="panel rounded-sm mt-4 overflow-hidden">
+            <div class="p-4 border-b border-white/10 bg-white/[0.02] flex items-center justify-between">
+              <div class="text-white font-bold uppercase tracking-wider text-sm">
+                <i class="fa-solid fa-list mr-2 text-white/70"></i>List
+              </div>
+              <div class="flex gap-1" aria-hidden="true">
+                <span class="w-1 h-1 bg-accent-primary rounded-full animate-pulse"></span>
+                <span class="w-1 h-1 bg-accent-secondary rounded-full animate-pulse delay-100"></span>
+                <span class="w-1 h-1 bg-accent-tertiary rounded-full animate-pulse delay-200"></span>
+              </div>
+            </div>
+            <div id="list" class="divide-y divide-white/5"></div>
+          </div>
+        </aside>
+
+        <!-- Right -->
+        <section class="lg:col-span-9 xl:col-span-10">
+          <div id="empty" class="panel rounded-sm p-6">
+            <div class="text-white font-bold uppercase tracking-wider text-sm">Select a report</div>
+            <div class="text-sm text-gray-500 mt-2 font-mono">Choose one from the list.</div>
+          </div>
+
+          <div id="viewer" class="panel rounded-sm p-6 hidden">
+            <div class="flex flex-col xl:flex-row xl:items-start gap-5">
+              <img id="photo"
+                   class="w-full max-h-[220px] sm:max-h-[280px] object-contain xl:w-60 xl:max-h-none xl:object-cover rounded-sm border border-white/10 bg-black/20 hidden"
+                   alt="Photo" />
+
+              <div class="flex-1">
+                <div class="flex items-start justify-between gap-6">
+                  <div>
+                    <div id="title" class="text-white font-bold uppercase tracking-wider text-2xl">—</div>
+                    <div id="subtitle" class="text-gray-500 text-xs font-mono uppercase tracking-widest mt-2">—</div>
+                  </div>
+                  <div class="hidden md:flex items-center gap-2 text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+                    <i class="fa-solid fa-shield-halved"></i><span>Traceable</span>
+                  </div>
+                </div>
+
+                <div id="downloads" class="flex flex-wrap gap-2 mt-5">
+                  <a id="dlPdf" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" download>
+                    <i class="fa-solid fa-file-pdf mr-2"></i>PDF
+                  </a>
+                  <a id="dlL" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" download>
+                    <i class="fa-solid fa-table mr-2"></i>FR-L CSV
+                  </a>
+                  <a id="dlR" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" download>
+                    <i class="fa-solid fa-table mr-2"></i>FR-R CSV
+                  </a>
+                  <a id="dlIrL" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" download>
+                    <i class="fa-solid fa-wave-square mr-2"></i>IR-L
+                  </a>
+                  <a id="dlIrR" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" download>
+                    <i class="fa-solid fa-wave-square mr-2"></i>IR-R
+                  </a>
+                  <a id="openPdf" class="btn rounded-sm px-3 py-2 text-xs text-white hidden font-mono uppercase tracking-widest" target="_blank" rel="noopener">
+                    <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>Open PDF
+                  </a>
+                </div>
+
+                <div class="mt-5">
+                  <div class="tabsWrap inline-flex gap-2 rounded-sm p-1">
+                    <button id="tabPlot" class="tabBtn tabBtnOn"><i class="fa-solid fa-chart-line"></i>Plot</button>
+                    <button id="tabReport" class="tabBtn"><i class="fa-solid fa-file-lines"></i>Report</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="panelPlot" class="mt-6">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-white font-bold uppercase tracking-wider text-sm">
+                    <i class="fa-solid fa-chart-line mr-2 text-white/70"></i>Interactive FR
+                  </div>
+                  <div class="text-[10px] text-gray-600 mt-2 font-mono uppercase tracking-widest">
+                    Left blue • Right red
+                  </div>
+                </div>
+                <button id="plotReset" class="btn rounded-sm px-3 py-2 text-xs text-white font-mono uppercase tracking-widest">
+                  <i class="fa-solid fa-arrows-rotate mr-2"></i>Reset view
+                </button>
+              </div>
+
+              <div id="plot" class="mt-4 border border-white/10 bg-black/20" style="min-height:360px;"></div>
+            </div>
+
+            <div id="panelReport" class="mt-6 hidden">
+              <div class="flex items-center justify-between">
+                <div class="text-white font-bold uppercase tracking-wider text-sm">
+                  <i class="fa-solid fa-file-pdf mr-2 text-white/70"></i>PDF Viewer
+                </div>
+                <span class="text-[10px] text-gray-600 font-mono uppercase tracking-widest">Browser viewer</span>
+              </div>
+
+              <object id="pdf"
+                      class="w-full mt-3 border border-white/10 bg-black/20"
+                      style="height: 78vh;"
+                      type="application/pdf"
+                      data="">
+                <div class="p-4 text-sm text-gray-300">
+                  PDF preview not available in this browser.
+                  <a id="pdfFallback" class="underline text-white" href="#" target="_blank" rel="noopener">Open PDF</a>
+                </div>
+              </object>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="border-t border-white/10 pt-8 pb-10 mt-2 opacity-0 animate-fade-in-up delay-300">
+      <div class="px-6 lg:px-12 max-w-[1600px] mx-auto flex justify-end items-center text-xs">
+        <div class="font-mono text-[10px] uppercase tracking-widest text-gray-600">© 2026 G.A.L.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const INDEX_URL = "index.json";
+    const state = { all: [], filtered: [], selected: null, urls: {} };
+
+    const el = (id) => document.getElementById(id);
+    const has = (v) => v !== null && v !== undefined && String(v).trim() !== "";
+
+    function setNavHeightVar() {
+      const nav = document.getElementById("navbar");
+      if (!nav) return;
+      document.documentElement.style.setProperty("--nav-h", `${Math.round(nav.getBoundingClientRect().height || 64)}px`);
+    }
+
+    function joinPath(base, file){
+      if (!has(file)) return null;
+      return base.replace(/\/?$/, "/") + file;
+    }
+
+    function fmtDate(d){
+      const dt = new Date(d + "T00:00:00");
+      return new Intl.DateTimeFormat("en-GB", { year:"numeric", month:"short", day:"2-digit" }).format(dt);
+    }
+
+    function applyFilters(){
+      const q = el("q").value.trim().toLowerCase();
+      const brand = el("brand").value;
+
+      state.filtered = state.all.filter(r => {
+        if (brand && r.brand !== brand) return false;
+        if (q){
+          const hay = `${r.brand} ${r.model} ${r.date}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      el("count").textContent = `${state.filtered.length} report${state.filtered.length === 1 ? "" : "s"}`;
+    }
+
+    function renderList(){
+      const list = el("list");
+      list.innerHTML = "";
+
+      state.filtered.forEach(r => {
+        const b = document.createElement("button");
+        b.className = "w-full text-left p-4 hover:bg-white/5 transition-colors";
+        b.innerHTML = `
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-white font-bold uppercase tracking-wider text-sm truncate">${r.brand} ${r.model}</div>
+            <div class="text-gray-600 text-[10px] font-mono uppercase tracking-widest">${fmtDate(r.date)}</div>
+          </div>
+        `;
+        b.onclick = () => selectReport(r);
+        list.appendChild(b);
+      });
+
+      if (!state.selected && state.filtered.length) selectReport(state.filtered[0]);
+      if (!state.filtered.length){
+        el("viewer").classList.add("hidden");
+        el("empty").classList.remove("hidden");
+      }
+    }
+
+    async function fetchText(url){
+      const res = await fetch(url, { cache:"no-store" });
+      if (!res.ok) throw new Error(`Failed to load ${url}`);
+      return await res.text();
+    }
+
+    function setDl(id, url){
+      const a = el(id);
+      if (has(url)){
+        a.classList.remove("hidden");
+        a.href = url;
+      } else {
+        a.classList.add("hidden");
+        a.removeAttribute("href");
+      }
+    }
+
+    function parseCsv(text){
+      const lines = text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      if (!lines.length) return { x: [], y: [] };
+
+      const header = lines[0].split(",").map(s => s.trim().toLowerCase());
+      const idxF = header.findIndex(h => h.includes("frequency"));
+      const idxM = header.findIndex(h => h.includes("magnitude"));
+
+      const x = [], y = [];
+      for (let i=1; i<lines.length; i++){
+        const parts = lines[i].split(",").map(s => s.trim());
+        const f = parseFloat(parts[idxF]);
+        const m = parseFloat(parts[idxM]);
+        if (Number.isFinite(f) && Number.isFinite(m)) { x.push(f); y.push(m); }
+      }
+      return { x, y };
+    }
+
+    function setTab(which){
+      const onPlot = which === "plot";
+      el("tabPlot").classList.toggle("tabBtnOn", onPlot);
+      el("tabReport").classList.toggle("tabBtnOn", !onPlot);
+      el("panelPlot").classList.toggle("hidden", !onPlot);
+      el("panelReport").classList.toggle("hidden", onPlot);
+
+      const p = onPlot ? el("panelPlot") : el("panelReport");
+      p.classList.remove("fadeSwap"); void p.offsetWidth; p.classList.add("fadeSwap");
+    }
+
+    async function renderPlot(){
+      const plotDiv = el("plot");
+      plotDiv.innerHTML = "";
+
+      const { frLUrl, frRUrl } = state.urls;
+      const traces = [];
+
+      if (has(frLUrl)){
+        try {
+          const t = parseCsv(await fetchText(frLUrl));
+          traces.push({ x:t.x, y:t.y, type:"scatter", mode:"lines", name:"Left",
+            line:{ color:"#3b82f6", width:2.8 }});
+        } catch(e) { console.warn(e); }
+      }
+
+      if (has(frRUrl)){
+        try {
+          const t = parseCsv(await fetchText(frRUrl));
+          traces.push({ x:t.x, y:t.y, type:"scatter", mode:"lines", name:"Right",
+            line:{ color:"#ef4444", width:2.8}});
+        } catch(e) { console.warn(e); }
+      }
+
+      if (!traces.length){
+        plotDiv.innerHTML = `
+          <div class="p-5 text-sm text-gray-300">
+            <div class="font-mono text-xs uppercase tracking-widest text-gray-500 mb-2">No FR CSV found</div>
+            Add <span class="font-mono">FR-L.csv</span> (and optionally <span class="font-mono">FR-R.csv</span>) next to the PDF.
+          </div>
+        `;
+        return;
+      }
+
+      const height = Math.max(360, Math.min(560, Math.floor(window.innerHeight * 0.46)));
+
+      const layout = {
+        height,
+        paper_bgcolor:"rgba(0,0,0,0)",
+        plot_bgcolor:"rgba(255,255,255,0.02)",
+        margin:{ l:56, r:16, t:10, b:48 },
+        showlegend:true,
+        legend:{ x:0.02, y:0.02, bgcolor:"rgba(0,0,0,0)", font:{ color:"rgba(229,231,235,0.85)" } },
+        xaxis:{
+          title:"Frequency (Hz)",
+          type:"log",
+          tickvals:[20,30,50,100,200,300,500,1000,2000,3000,5000,10000,20000],
+          ticktext:["20","30","50","100","200","300","500","1k","2k","3k","5k","10k","20k"],
+          gridcolor:"rgba(255,255,255,0.07)",
+          tickfont:{ color:"rgba(229,231,235,0.82)" },
+          titlefont:{ color:"rgba(229,231,235,0.82)" }
+        },
+        yaxis:{
+          title:"Magnitude (dB)",
+          gridcolor:"rgba(255,255,255,0.07)",
+          tickfont:{ color:"rgba(229,231,235,0.82)" },
+          titlefont:{ color:"rgba(229,231,235,0.82)" }
+        }
+      };
+
+      Plotly.newPlot(plotDiv, traces, layout, { displayModeBar:false, responsive:true });
+
+      el("plotReset").onclick = () =>
+        Plotly.relayout(plotDiv, { "xaxis.autorange": true, "yaxis.autorange": true });
+    }
+
+    async function selectReport(r){
+      state.selected = r;
+
+      el("empty").classList.add("hidden");
+      el("viewer").classList.remove("hidden");
+
+      el("title").textContent = `${r.brand} ${r.model}`;
+      el("subtitle").textContent = `${fmtDate(r.date)}`;
+
+      const base = r.path;
+      const pdfUrl   = joinPath(base, r.files?.pdf);
+      const frLUrl   = joinPath(base, r.files?.frL);
+      const frRUrl   = joinPath(base, r.files?.frR);
+      const irLUrl   = joinPath(base, r.files?.irL);
+      const irRUrl   = joinPath(base, r.files?.irR);
+      const photoUrl = joinPath(base, r.files?.photo);
+
+      state.urls = { pdfUrl, frLUrl, frRUrl, irLUrl, irRUrl, photoUrl };
+
+      setDl("dlPdf", pdfUrl);
+      setDl("dlL", frLUrl);
+      setDl("dlR", frRUrl);
+      setDl("dlIrL", irLUrl);
+      setDl("dlIrR", irRUrl);
+      setDl("openPdf", pdfUrl);
+
+      if (has(photoUrl)){
+        el("photo").classList.remove("hidden");
+        el("photo").src = photoUrl;
+      } else {
+        el("photo").classList.add("hidden");
+      }
+
+      const pdfObj = el("pdf");
+      if (has(pdfUrl)){
+        pdfObj.setAttribute("data", pdfUrl);
+        el("pdfFallback").href = pdfUrl;
+      } else {
+        pdfObj.setAttribute("data", "");
+        el("pdfFallback").href = "#";
+      }
+
+      setTab("plot");
+      await renderPlot();
+    }
+
+    async function init(){
+      const res = await fetch(INDEX_URL, { cache:"no-store" });
+      const data = await res.json();
+      state.all = data.reports || [];
+
+      const brands = [...new Set(state.all.map(r => r.brand))].sort();
+      const sel = el("brand");
+      brands.forEach(b => {
+        const o = document.createElement("option");
+        o.value = b; o.textContent = b;
+        sel.appendChild(o);
+      });
+
+      function rerender(){ applyFilters(); renderList(); }
+
+      ["q","brand"].forEach(id => {
+        el(id).addEventListener("input", rerender);
+        el(id).addEventListener("change", rerender);
+      });
+
+      el("reset").onclick = () => {
+        el("q").value = "";
+        el("brand").value = "";
+        state.selected = null;
+        rerender();
+      };
+
+      el("tabPlot").onclick = () => setTab("plot");
+      el("tabReport").onclick = () => setTab("report");
+
+      window.addEventListener("resize", () => {
+        const plotDiv = el("plot");
+        if (plotDiv && plotDiv.data && plotDiv.data.length) Plotly.Plots.resize(plotDiv);
+      });
+
+      rerender();
+    }
+
+    function positionToolsDropdown(){
+      const dd = document.getElementById("tools-dd");
+      const btn = document.getElementById("tools-btn");
+      const panel = document.getElementById("tools-panel");
+      if (!dd || !btn || !panel) return;
+
+      const prevOpacity = panel.style.opacity;
+      const prevPE = panel.style.pointerEvents;
+      const prevTransform = panel.style.transform;
+
+      panel.style.opacity = "0";
+      panel.style.pointerEvents = "none";
+      panel.style.transform = "translateY(0px)";
+
+      dd.classList.remove("right-open");
+      const rectLeft = panel.getBoundingClientRect();
+      const overflowRight = rectLeft.right > window.innerWidth - 10;
+      if (overflowRight) dd.classList.add("right-open");
+
+      const rectFinal = panel.getBoundingClientRect();
+      const overflowLeft = rectFinal.left < 10;
+      if (overflowLeft) dd.classList.remove("right-open");
+
+      panel.style.opacity = prevOpacity;
+      panel.style.pointerEvents = prevPE;
+      panel.style.transform = prevTransform;
+    }
+
+    function bindToolsDropdownAutoPosition(){
+      const dd = document.getElementById("tools-dd");
+      const btn = document.getElementById("tools-btn");
+      const panel = document.getElementById("tools-panel");
+      if (!dd || !btn || !panel) return;
+
+      dd.addEventListener("mouseenter", positionToolsDropdown, { passive:true });
+      btn.addEventListener("focus", positionToolsDropdown, { passive:true });
+      btn.addEventListener("click", positionToolsDropdown, { passive:true });
+
+      window.addEventListener("resize", positionToolsDropdown, { passive:true });
+      window.addEventListener("scroll", positionToolsDropdown, { passive:true });
+    }
+
+    // NEW hero waves (simple + reliable): parallel ribbons, no grid, no collisions
+    function canvasWaves() {
+      const canvas = document.getElementById("hero-canvas");
+      if (!canvas) return;
+
+      const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduce) return;
+
+      const ctx = canvas.getContext("2d", { alpha:true });
+      let w = 0, h = 0, dpr = 1;
+      let raf = 0;
+
+      function resize() {
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = canvas.clientWidth || window.innerWidth;
+        h = canvas.clientHeight || Math.max(520, Math.floor(window.innerHeight * 0.62));
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a) {
+        ctx.beginPath();
+        const step = w < 640 ? 10 : 14;
+
+        // fade at edges so it doesn't look like it hits walls
+        const edgeFade = (x) => {
+          const u = x / w;
+          const fi = Math.min(1, u / 0.08);
+          const fo = Math.min(1, (1 - u) / 0.08);
+          return Math.max(0, Math.min(fi, fo));
+        };
+
+        for (let x = 0; x <= w + step; x += step) {
+          const y =
+            y0 +
+            (Math.sin(x * f1 + t * sp1) * amp +
+             Math.sin(x * f2 - t * sp2) * (amp * 0.55)) *
+            (0.55 + 0.45 * edgeFade(x));
+
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+
+        ctx.lineWidth = lw;
+        ctx.strokeStyle = `rgba(255,255,255,${a})`;
+        ctx.stroke();
+      }
+
+      function frame() {
+        raf = requestAnimationFrame(frame);
+        ctx.clearRect(0, 0, w, h);
+
+        // faint vertical haze
+        const g = ctx.createLinearGradient(0, 0, 0, h);
+        g.addColorStop(0, "rgba(255,255,255,0.02)");
+        g.addColorStop(0.5, "rgba(255,255,255,0.00)");
+        g.addColorStop(1, "rgba(255,255,255,0.02)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        const t = performance.now() * 0.001;
+
+        const bands = 7;
+        const top = h * 0.24;
+        const span = h * 0.54;
+        const gap = span / (bands - 1);
+
+        for (let i = 0; i < bands; i++) {
+          const y0 = top + i * gap;
+
+          // amplitude is capped to avoid overlap/collisions
+          const amp = Math.min(18, gap * 0.30) * (0.85 + i * 0.04);
+
+          // close freqs = coherent ribbons
+          const f1 = 0.010 + i * 0.00055;
+          const f2 = 0.016 + i * 0.00045;
+          const sp1 = 1.20 + i * 0.03;
+          const sp2 = 0.90 + i * 0.02;
+
+          const mid = Math.floor(bands / 2);
+          const lw = 1.2 + (i === mid ? 0.9 : 0.4);
+          const a = 0.045 + (i === mid ? 0.03 : 0.0);
+
+          drawRibbon(y0, amp, f1, f2, sp1, sp2, t, lw, a);
+        }
+      }
+
+      window.addEventListener("resize", () => {
+        cancelAnimationFrame(raf);
+        resize();
+        frame();
+      }, { passive:true });
+
+      resize();
+      frame();
+    }
+
+    window.addEventListener("load", () => {
+      setNavHeightVar();
+      canvasWaves();
+      bindToolsDropdownAutoPosition();
+
+      setTimeout(() => {
+        const overlay = document.getElementById("intro-overlay");
+        if (overlay) overlay.classList.add("intro-hidden");
+      }, 1100);
+
+      init().catch(err => {
+        console.error(err);
+        el("list").innerHTML = `<div class="p-4 text-sm text-red-300">Failed to load ${INDEX_URL}</div>`;
+      });
+    });
+
+    window.addEventListener("resize", setNavHeightVar, { passive: true });
+  </script>
+</body>
+</html>
+
