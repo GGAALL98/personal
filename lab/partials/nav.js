@@ -25,22 +25,23 @@
     if (!res.ok) throw new Error(`nav.html missing: ${res.status}`);
     slot.innerHTML = await res.text();
 
-    // Rewrite links (GitHub Pages safe)
+    // Rewrite links
     slot.querySelectorAll("[data-root-href]").forEach((a) => {
       const rel = a.getAttribute("data-root-href") || "";
       const href = `${root}/${rel}`.replace(/\/{2,}/g, "/");
       a.setAttribute("href", href);
     });
 
-    // Update CSS var for scroll-margin, etc (if your page uses it)
     setNavHeightVar();
 
-    // Dropdown wiring
+    // Desktop dropdown
     enableDropdownClick();
     bindToolsDropdownAutoPosition();
     highlightActiveNav();
 
-    // Keep nav height var updated
+    // Mobile drawer
+    enableMobileMenu();
+
     window.addEventListener("resize", setNavHeightVar, { passive: true });
   } catch (err) {
     console.error(err);
@@ -51,9 +52,7 @@
     `;
   }
 
-  // -------------------------
   // Helpers
-  // -------------------------
   function setNavHeightVar() {
     const nav = document.getElementById("navbar");
     if (!nav) return;
@@ -69,14 +68,12 @@
       try {
         const url = new URL(a.href, location.href);
         const p = url.pathname.replace(/\/+$/, "");
-        if (p === here) {
-          a.classList.add("text-white");
-        }
+        if (p === here) a.classList.add("text-white");
       } catch {}
     });
   }
 
-  // Click-to-toggle (touch friendly) + close outside + esc
+  // Desktop: dropdown
   function enableDropdownClick() {
     const dd = document.getElementById("tools-dd");
     const btn = document.getElementById("tools-btn");
@@ -106,7 +103,6 @@
     });
   }
 
-  // Auto-position dropdown: open left if it overflows right
   function positionToolsDropdown() {
     const dd = document.getElementById("tools-dd");
     const panel = document.getElementById("tools-panel");
@@ -114,7 +110,6 @@
 
     dd.classList.remove("right-open");
 
-    // Temporarily force measurable state (without showing it)
     const prev = {
       opacity: panel.style.opacity,
       pointerEvents: panel.style.pointerEvents,
@@ -127,15 +122,12 @@
     panel.style.pointerEvents = "none";
     panel.style.transform = "translateY(0px)";
 
-    // First measure as left-open
     const rectLeft = panel.getBoundingClientRect();
     if (rectLeft.right > window.innerWidth - 10) dd.classList.add("right-open");
 
-    // If now it overflows left, revert
     const rectFinal = panel.getBoundingClientRect();
     if (rectFinal.left < 10) dd.classList.remove("right-open");
 
-    // Restore
     panel.style.opacity = prev.opacity;
     panel.style.pointerEvents = prev.pointerEvents;
     panel.style.transform = prev.transform;
@@ -153,5 +145,60 @@
 
     window.addEventListener("resize", positionToolsDropdown, { passive: true });
     window.addEventListener("scroll", positionToolsDropdown, { passive: true });
+  }
+
+  // Mobile: drawer menu
+  function enableMobileMenu() {
+    const openBtn = document.getElementById("mobile-menu-btn");
+    const closeBtn = document.getElementById("mobile-menu-close");
+    const panel = document.getElementById("mobile-menu-panel");
+    const backdrop = document.getElementById("mobile-menu-backdrop");
+    if (!openBtn || !closeBtn || !panel || !backdrop) return;
+
+    let lastFocus = null;
+
+    function openMenu() {
+      lastFocus = document.activeElement;
+      document.documentElement.classList.add("mnav-open");
+      openBtn.setAttribute("aria-expanded", "true");
+      backdrop.setAttribute("aria-hidden", "false");
+      // focus panel for ESC + accessibility
+      setTimeout(() => panel.focus({ preventScroll: true }), 0);
+    }
+
+    function closeMenu() {
+      document.documentElement.classList.remove("mnav-open");
+      openBtn.setAttribute("aria-expanded", "false");
+      backdrop.setAttribute("aria-hidden", "true");
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+      lastFocus = null;
+    }
+
+    openBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isOpen = document.documentElement.classList.contains("mnav-open");
+      isOpen ? closeMenu() : openMenu();
+    });
+
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeMenu();
+    });
+
+    backdrop.addEventListener("click", closeMenu);
+
+    panel.querySelectorAll("a[href]").forEach((a) => {
+      a.addEventListener("click", () => closeMenu());
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!document.documentElement.classList.contains("mnav-open")) return;
+      closeMenu();
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 768) closeMenu();
+    }, { passive: true });
   }
 })();
