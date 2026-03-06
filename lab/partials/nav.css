@@ -1,4 +1,4 @@
-/* Dropdown scaffold (works with your existing Tailwind + colors) */
+/* Dropdown scaffold */
 .dd { position: relative; }
 
 .dd-panel{
@@ -15,7 +15,6 @@
   z-index: 9999;
 }
 
-/* keep-open hover + keyboard */
 .dd:hover .dd-panel,
 .dd:focus-within .dd-panel{
   opacity: 1;
@@ -23,14 +22,12 @@
   transform: translateY(0px);
 }
 
-/* keep-open on click (nav.js toggles dd-open) */
 .dd.dd-open .dd-panel{
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0px);
 }
 
-/* “hover gap” so it doesn’t disappear while moving mouse to panel */
 .dd-panel::before{
   content: "";
   position: absolute;
@@ -39,8 +36,112 @@
   height: 14px;
 }
 
-/* open to the other side when needed */
 .dd.right-open .dd-panel{
   left: auto;
   right: 0;
 }
+
+/* Mobile drawer  */
+.mnav-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,5,0.62);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+  z-index: 9998;
+}
+
+.mnav-panel{
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(360px, 92vw);
+  background: rgba(15,15,16,0.96);
+  border-left: 1px solid rgba(255,255,255,0.10);
+  transform: translateX(102%);
+  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -40px 0 120px rgba(0,0,0,0.55);
+  outline: none;
+}
+
+.mnav-header{
+  height: 64px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.mnav-close{
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.85);
+  border-radius: 6px;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.mnav-close:hover{
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.mnav-body{
+  padding: 14px 14px 22px;
+  overflow: auto;
+}
+
+.mnav-link{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.18);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  margin-bottom: 10px;
+}
+.mnav-link:hover{
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.94);
+}
+
+.mnav-section{
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255,255,255,0.10);
+}
+
+.mnav-section-title{
+  font: 600 11px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  text-transform: uppercase;
+  letter-spacing: .32em;
+  color: rgba(255,255,255,0.40);
+  margin: 10px 4px 12px;
+}
+
+html.mnav-open .mnav-backdrop{
+  opacity: 1;
+  pointer-events: auto;
+}
+html.mnav-open .mnav-panel{
+  transform: translateX(0%);
+}
+
+@media (prefers-reduced-motion: reduce){
+  .mnav-backdrop, .mnav-panel{ transition: none !important; }
+}
+
