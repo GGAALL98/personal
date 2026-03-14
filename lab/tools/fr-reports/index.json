@@ -11,7 +11,21 @@
         "frR": null,
         "irL": null,
         "irR": null,
-        "photo": "photo.png"
+        "photo": "iem_photo.webp"
+      }
+    },
+    {
+      "brand": "AKG",
+      "model": "Q350",
+      "date": "2026-03-14",
+      "path": "reports/AKG/Q350/2026-03-14/",
+      "files": {
+        "pdf": "report.pdf",
+        "frL": "FR-L.csv",
+        "frR": null,
+        "irL": null,
+        "irR": null,
+        "photo": "iem_photo.webp"
       }
     }
   ]
