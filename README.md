@@ -5,7 +5,7 @@ A modern, split-screen personal portfolio showcasing both professional acoustics
 ## 🎯 Overview
 
 This repository hosts a dual-themed personal website for **Gal Ben (Goby)**, featuring:
-- **Gaul Acoustics Strive** - Independent acoustics research laboratory
+- **Gaul Acoustics** - Independent acoustics research laboratory
 - **GobyOS** - Personal portfolio and creative showcase
 
 ## 🌐 Live Demo
