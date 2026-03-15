@@ -15,6 +15,20 @@
       }
     },
     {
+      "brand": "KZ",
+      "model": "PR4",
+      "date": "2026-02-19",
+      "path": "reports/KZ/PR4/2026-02-19/",
+      "files": {
+        "pdf": "report.pdf",
+        "frL": "FR-L.csv",
+        "frR": null,
+        "irL": null,
+        "irR": null,
+        "photo": "iem_photo.webp"
+      }
+    },
+    {
       "brand": "AKG",
       "model": "Q350",
       "date": "2026-03-14",
